@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "About";
+}
+
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+    <h2>@ViewBag.Message</h2>
+</hgroup>
+
+<article>
+    <p>
+        Ez az oldal az ELTE Informatikai Kar MSc-n oktatott Szoftverfolyamat tervezése és kivitelezése kurzus beadandójának készült, és egy többszemélyes onlnie tank játékot valósít meg.
+</article>
+
+<aside>
+    <h3>Menü</h3>
+    <p>
+        Az alábbi menüpontok érhetőek el jelenleg.
+    </p>
+    <ul>
+        <li>@Html.ActionLink("Home", "Index", "Home")</li>
+        <li>@Html.ActionLink("About", "About", "Home")</li>
+        <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+    </ul>
+</aside>
