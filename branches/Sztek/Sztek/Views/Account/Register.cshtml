@@ -27,6 +27,16 @@
                 @Html.LabelFor(m => m.ConfirmPassword)
                 @Html.PasswordFor(m => m.ConfirmPassword)
             </li>
+            <li>
+                @Html.LabelFor(m => m.Description)
+                @Html.EditorFor(m => m.Description)
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Country)
+                @Html.EditorFor(m => m.Country)
+            </li>
+
+
         </ol>
         <input type="submit" value="Register" />
     </fieldset>
