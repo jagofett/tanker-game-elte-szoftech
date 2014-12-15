@@ -38,7 +38,7 @@ namespace Sztek.Filters
                         }
                     }
 
-                    WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);
+                    WebSecurity.InitializeDatabaseConnection("tankergameEntities", "users", "Id", "username", autoCreateTables: true);
                 }
                 catch (Exception ex)
                 {
