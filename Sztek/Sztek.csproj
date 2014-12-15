@@ -43,7 +43,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.6.1.2-beta2\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework.SqlServer">
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.6.1.2-beta2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -192,34 +193,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
-    <Compile Include="Models\games.cs">
-      <DependentUpon>TankerModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\lobby.cs">
-      <DependentUpon>TankerModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\results.cs">
-      <DependentUpon>TankerModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\TankerModel.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TankerModel.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\TankerModel.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TankerModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\TankerModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TankerModel.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Models\users.cs">
-      <DependentUpon>TankerModel.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Models\games.cs" />
+    <Compile Include="Models\lobby.cs" />
+    <Compile Include="Models\results.cs" />
+    <Compile Include="Models\users.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -279,23 +258,6 @@
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <EntityDeploy Include="Models\TankerModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>TankerModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <Content Include="Models\TankerModel.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>TankerModel.edmx</DependentUpon>
-      <LastGenOutput>TankerModel.Context.cs</LastGenOutput>
-    </Content>
-    <Content Include="Models\TankerModel.edmx.diagram">
-      <DependentUpon>TankerModel.edmx</DependentUpon>
-    </Content>
-    <Content Include="Models\TankerModel.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>TankerModel.edmx</DependentUpon>
-      <LastGenOutput>TankerModel.cs</LastGenOutput>
-    </Content>
     <None Include="Scripts\jquery-1.8.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.8.2.js" />
     <Content Include="Scripts\jquery-1.8.2.min.js" />
@@ -337,14 +299,10 @@
     <Content Include="Images\orderedList9.png" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Account\_ChangePasswordPartial.cshtml" />
-    <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
-    <Content Include="Views\Account\_RemoveExternalLoginsPartial.cshtml" />
     <Content Include="Views\Account\_SetPasswordPartial.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Manage.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
-    <Content Include="Views\Account\ExternalLoginFailure.cshtml" />
-    <Content Include="Views\Account\ExternalLoginConfirmation.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
