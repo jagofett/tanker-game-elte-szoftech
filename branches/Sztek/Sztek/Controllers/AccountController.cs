@@ -41,7 +41,7 @@ namespace Sztek.Controllers
             }
 
             // If we got this far, something failed, redisplay form
-            ModelState.AddModelError("", "The user name or password provided is incorrect.");
+            ModelState.AddModelError("", "A megadott felhasználónév és jelszó helytelen.");
             return View(model);
         }
 
@@ -79,7 +79,20 @@ namespace Sztek.Controllers
                 // Attempt to register the user
                 try
                 {
+                    var database = new DatabaseEntities();
+                    
                     WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new { Description = model.Description, Country = model.Country, in_lobby = false});
+
+                    var user = new Sztek.Models.users()
+                    {
+                        username = model.UserName,
+                        country = model.Country,
+                        description = model.Description,
+                        in_lobby = false,
+                        id = WebSecurity.GetUserId(model.UserName)
+                    };
+                    database.Users.Add(user);
+
                     WebSecurity.Login(model.UserName, model.Password);
                     return RedirectToAction("Index", "Home");
                 }
@@ -128,8 +141,8 @@ namespace Sztek.Controllers
         public ActionResult Manage(ManageMessageId? message)
         {
             ViewBag.StatusMessage =
-                message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
-                : message == ManageMessageId.SetPasswordSuccess ? "Your password has been set."
+                message == ManageMessageId.ChangePasswordSuccess ? "A jelszavad meg lett változtatva."
+                : message == ManageMessageId.SetPasswordSuccess ? "A jelszavad mentésre került."
                 : message == ManageMessageId.RemoveLoginSuccess ? "The external login was removed."
                 : "";
             ViewBag.HasLocalPassword = OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
@@ -168,7 +181,7 @@ namespace Sztek.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("", "The current password is incorrect or the new password is invalid.");
+                        ModelState.AddModelError("", "A jelenlegi jelszó helytelen, az új pedig nem megfelelő.");
                     }
                 }
             }
@@ -191,7 +204,7 @@ namespace Sztek.Controllers
                     }
                     catch (Exception)
                     {
-                        ModelState.AddModelError("", String.Format("Unable to create local account. An account with the name \"{0}\" may already exist.", User.Identity.Name));
+                        ModelState.AddModelError("", String.Format("Felhasználói profil létrehozása sikertelen. Egy felhasználó már létezhet \"{0}\" névvel.", User.Identity.Name));
                     }
                 }
             }

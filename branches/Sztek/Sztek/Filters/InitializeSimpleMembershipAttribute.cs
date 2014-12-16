@@ -25,11 +25,11 @@ namespace Sztek.Filters
         {
             public SimpleMembershipInitializer()
             {
-                Database.SetInitializer<UsersContext>(null);
+                Database.SetInitializer<DatabaseEntities>(null);
 
                 try
                 {
-                    using (var context = new UsersContext())
+                    using (var context = new DatabaseEntities())
                     {
                         if (!context.Database.Exists())
                         {

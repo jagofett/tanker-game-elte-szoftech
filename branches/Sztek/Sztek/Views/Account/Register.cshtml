@@ -1,11 +1,11 @@
 ﻿@model Sztek.Models.RegisterModel
 @{
-    ViewBag.Title = "Register";
+    ViewBag.Title = "Regisztráció";
 }
 
 <hgroup class="title">
     <h1>@ViewBag.Title.</h1>
-    <h2>Create a new account.</h2>
+    <h2>Készíts új felhasználónevet.</h2>
 </hgroup>
 
 @using (Html.BeginForm()) {
@@ -35,10 +35,8 @@
                 @Html.LabelFor(m => m.Country)
                 @Html.EditorFor(m => m.Country)
             </li>
-
-
         </ol>
-        <input type="submit" value="Register" />
+        <input type="submit" value="Regisztrálás" />
     </fieldset>
 }
 

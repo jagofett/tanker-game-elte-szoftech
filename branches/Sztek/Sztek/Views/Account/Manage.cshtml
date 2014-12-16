@@ -1,6 +1,6 @@
 ﻿@model Sztek.Models.LocalPasswordModel
 @{
-    ViewBag.Title = "Manage Account";
+    ViewBag.Title = "Profil szerkesztése";
 }
 
 <hgroup class="title">
@@ -9,7 +9,7 @@
 
 <p class="message-success">@ViewBag.StatusMessage</p>
 
-<p>You're logged in as <strong>@User.Identity.Name</strong>.</p>
+<p>Be vagy jelentkezve <strong>@User.Identity.Name</strong> felhasználóval.</p>
 
 @if (ViewBag.HasLocalPassword)
 {
@@ -19,8 +19,6 @@ else
 { 
     @Html.Partial("_SetPasswordPartial")
 }
-
-
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
