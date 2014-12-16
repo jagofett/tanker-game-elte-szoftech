@@ -17,6 +17,8 @@ namespace Sztek.Controllers
     [InitializeSimpleMembership]
     public class AccountController : Controller
     {
+        DatabaseEntities _database = new DatabaseEntities();
+
         //
         // GET: /Account/Login
 
@@ -52,6 +54,14 @@ namespace Sztek.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
         {
+            //kiléptetés a lobbiból
+            var name = User.Identity.Name;
+            var user = _database.Users.FirstOrDefault(us => us.username == name);
+            if (user != null)
+            {
+                user.in_lobby = false;
+                _database.SaveChanges();
+            }
             WebSecurity.Logout();
 
             return RedirectToAction("Index", "Home");
@@ -79,20 +89,15 @@ namespace Sztek.Controllers
                 // Attempt to register the user
                 try
                 {
-                    var database = new DatabaseEntities();
                     
                     WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new { Description = model.Description, Country = model.Country, in_lobby = false});
-
-                    var user = new Sztek.Models.users()
+                    var id = WebSecurity.GetUserId(model.UserName);
+                    var user = _database.Users.FirstOrDefault(us => us.id == id);
+                    if (user != null)
                     {
-                        username = model.UserName,
-                        country = model.Country,
-                        description = model.Description,
-                        in_lobby = false,
-                        id = WebSecurity.GetUserId(model.UserName)
-                    };
-                    database.Users.Add(user);
-
+                        user.in_lobby = false;
+                        _database.SaveChanges();
+                    }
                     WebSecurity.Login(model.UserName, model.Password);
                     return RedirectToAction("Index", "Home");
                 }
