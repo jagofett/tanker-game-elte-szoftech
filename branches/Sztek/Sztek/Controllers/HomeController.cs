@@ -1,4 +1,5 @@
-﻿using Microsoft.Web.WebPages.OAuth;
+﻿using System.Security.Principal;
+using Microsoft.Web.WebPages.OAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace Sztek.Controllers
 {
     public class HomeController : Controller
     {       
+        private DatabaseEntities _entities = new DatabaseEntities();
         public ActionResult Index()
         {
             ViewBag.Message = "";
@@ -38,7 +40,7 @@ namespace Sztek.Controllers
             return View();
         }
 
-        
+        [Authorize]
         public ActionResult Lobby()
         {
             if (Request.IsAuthenticated)
@@ -52,12 +54,16 @@ namespace Sztek.Controllers
                 return RedirectToAction("NotLoggedIn", "Home");
             }
         }
-
+        [Authorize]
         [HttpPost]
         public ActionResult JoinLobby()
         {
 
-
+            var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
+            if (current == null)
+                return RedirectToAction("Index");
+            current.in_lobby = true;
+            _entities.SaveChanges();
             // If we got this far, something failed, redisplay form
             return RedirectToAction("Lobby", "Home");
         }
