@@ -45,9 +45,15 @@ namespace Sztek.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                var database = new DatabaseEntities();
+                var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
+                if (current == null)
+                    return RedirectToAction("Index");
 
-                return View(database);
+                ViewBag.Message = current.in_lobby.GetValueOrDefault()
+                    ? "Kilépés"
+                    : "Csatlakozás";
+
+                return View(_entities);
             }
             else
             {
@@ -58,13 +64,21 @@ namespace Sztek.Controllers
         [HttpPost]
         public ActionResult JoinLobby()
         {
-
             var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
             if (current == null)
                 return RedirectToAction("Index");
-            current.in_lobby = true;
+
+            if (current.in_lobby.GetValueOrDefault())
+                current.in_lobby = false;
+            else
+                current.in_lobby = true;
+
             _entities.SaveChanges();
-            // If we got this far, something failed, redisplay form
+
+            ViewBag.Message = current.in_lobby.GetValueOrDefault()
+                ? "Kilépés"
+                : "Csatlakozás";
+
             return RedirectToAction("Lobby", "Home");
         }
     }

@@ -34,7 +34,7 @@
     </ul>
     @using (Html.BeginForm("JoinLobby", "Home"))
     {
-        <button type="submit">Csatlakozás</button>
+        <button type="submit">@ViewBag.Message</button>
     }
 </section>
 
