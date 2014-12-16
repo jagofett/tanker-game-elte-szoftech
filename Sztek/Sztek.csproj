@@ -335,6 +335,7 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\Home\Lobby.cshtml" />
     <Content Include="Views\Shared\NotLoggedIn.cshtml" />
+    <Content Include="Views\Home\JoinedToLobby.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

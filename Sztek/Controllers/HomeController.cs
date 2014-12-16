@@ -40,7 +40,26 @@ namespace Sztek.Controllers
             return View();
         }
 
-        [Authorize]
+        public ActionResult JoinedToLobby()
+        {
+            if (Request.IsAuthenticated)
+            {
+                var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
+                if (current == null)
+                    return RedirectToAction("Index");
+
+                ViewBag.Message = current.in_lobby.GetValueOrDefault()
+                    ? "Kilépés"
+                    : "Csatlakozás";
+
+                return PartialView(_entities);
+            }
+            else
+            {
+                return RedirectToAction("NotLoggedIn", "Home");
+            }
+        }
+
         public ActionResult Lobby()
         {
             if (Request.IsAuthenticated)
