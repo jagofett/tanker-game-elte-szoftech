@@ -5,7 +5,7 @@ namespace Sztek.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<Sztek.Models.UsersContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<Sztek.Models.DatabaseEntities>
     {
         public Configuration()
         {
@@ -13,7 +13,7 @@ namespace Sztek.Migrations
             AutomaticMigrationDataLossAllowed = true;
         }
 
-        protected override void Seed(Sztek.Models.UsersContext context)
+        protected override void Seed(Sztek.Models.DatabaseEntities context)
         {
             //  This method will be called after migrating to the latest version.
 
