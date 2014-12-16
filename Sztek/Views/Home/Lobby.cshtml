@@ -21,7 +21,7 @@
             
             foreach (var user in Model.Users)
             {
-                if (@user.in_lobby)
+                if ((@user.in_lobby).GetValueOrDefault())
                 { 
                     <li>
                         @user.username
@@ -30,7 +30,10 @@
             }
         }
     </ul>
-    <input type="button" id="joinLobby" value="Csatlakozás"/>
+    @using (Html.BeginForm("JoinLobby", "Home"))
+    {
+        <button type="submit">Csatlakozás</button>
+    }
 </section>
 
 @section scripts {
