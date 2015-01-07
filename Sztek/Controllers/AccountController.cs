@@ -217,7 +217,15 @@ namespace Sztek.Controllers
         }
 
 
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+                return RedirectToAction("Index", "Home");
 
+            var model = "";
+            return View(model);
+
+        }
 
 
         #region Helpers
