@@ -2,24 +2,31 @@
 
 <h2>@ViewBag.Title</h2>
 <article>
-    <dl>
+    <ul>
         @* a displayNameFor működéséhez a users táblába kellenek [DisplayName("Név")] atribútumok az egyes propertikre, a toplistModel alapján *@
-        <dt>@Html.DisplayNameFor(x => x.username)</dt>
-        <dd>@Html.DisplayFor(x => x.username)</dd>
+        <li>
+            @Html.DisplayNameFor(x => x.username):
+            @Html.Label(Model.username)
+        </li>
 
-        <dt>@Html.DisplayNameFor(x => x.country)</dt>
-        <dd>@Html.DisplayFor(x => x.country)</dd>
+        <li>
+            @Html.DisplayNameFor(x => x.country):
+            @Html.Label(Model.country)
+        </li>
 
-        <dt>@Html.DisplayNameFor(x => x.description)</dt>
-        <dd>@Html.DisplayFor(x => x.description)</dd>
+        <li>
+            @Html.DisplayNameFor(x => x.description):
+            @Html.Label(Model.description)
+        </li>
 
-        <dt>@Html.DisplayNameFor(x => x.in_lobby)</dt>
-        <dd>@Html.DisplayFor(x => x.in_lobby)</dd>
-
-
-
-    </dl>
-
-    
-
+        <li>
+            @Html.DisplayNameFor(x => x.in_lobby):
+            @if (Model.in_lobby.GetValueOrDefault()) {  
+                @Html.Label("Igen"); 
+            }
+            else { 
+                @Html.Label("Nem"); 
+            }
+        </li>
+    </ul>
 </article>
