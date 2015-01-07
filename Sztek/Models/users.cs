@@ -8,12 +8,23 @@ namespace Sztek.Models
 {
     public class users
     {
+        [DisplayName("ID")]
         public int id { get; set; }
+        
+        [DisplayName("Felhasználónév")]
         public string username { get; set; }
+
+        [DisplayName("Játékok")]
         public virtual games game { get; set; }
+
+        [DisplayName("Játékra vár")]
         [DefaultValue(false)]
         public bool? in_lobby { get; set; }
+
+        [DisplayName("Ország")]
         public string country { get; set; }
+
+        [DisplayName("Leírás")]
         public string description { get; set; }
 
 
