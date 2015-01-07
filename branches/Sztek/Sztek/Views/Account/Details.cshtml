@@ -1,5 +1,25 @@
-﻿@{
-    ViewBag.Title = "Details";
-}
+﻿@model Sztek.Models.users
 
-<h2>Details</h2>
+<h2>@ViewBag.Title</h2>
+<article>
+    <dl>
+        @* a displayNameFor működéséhez a users táblába kellenek [DisplayName("Név")] atribútumok az egyes propertikre, a toplistModel alapján *@
+        <dt>@Html.DisplayNameFor(x => x.username)</dt>
+        <dd>@Html.DisplayFor(x => x.username)</dd>
+
+        <dt>@Html.DisplayNameFor(x => x.country)</dt>
+        <dd>@Html.DisplayFor(x => x.country)</dd>
+
+        <dt>@Html.DisplayNameFor(x => x.description)</dt>
+        <dd>@Html.DisplayFor(x => x.description)</dd>
+
+        <dt>@Html.DisplayNameFor(x => x.in_lobby)</dt>
+        <dd>@Html.DisplayFor(x => x.in_lobby)</dd>
+
+
+
+    </dl>
+
+    
+
+</article>
