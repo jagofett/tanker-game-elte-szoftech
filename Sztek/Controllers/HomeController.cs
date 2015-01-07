@@ -87,10 +87,19 @@ namespace Sztek.Controllers
             if (current == null)
                 return RedirectToAction("Index");
 
-            if (current.in_lobby.GetValueOrDefault())
-                current.in_lobby = false;
-            else
-                current.in_lobby = true;
+            current.in_lobby = !current.in_lobby.GetValueOrDefault();
+            _entities.SaveChanges();
+
+            var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool) x.in_lobby).ToList();
+            if (inLobby.Count() >= 4)
+            {
+                var newGame = new games() {max_player = 4, users = inLobby, status = true};
+                _entities.Games.Add(newGame);
+                inLobby.ForEach(x => { x.in_lobby = false;
+                                         x.game = newGame;
+                });
+                //egyéb game  indítás...
+            }
 
             _entities.SaveChanges();
 

@@ -3,6 +3,8 @@
 @{
     ViewBag.Title = "Váróterem";
 }
+
+@Html.Hidden("joinedUrl",Url.Action("JoinedToLobby","Home",new {@id= "joinedUrl"}))
     <h2>Váróterem</h2>
     <section style="float: right">
         <div class="container">
@@ -18,7 +20,8 @@
     <div id="joinedUsers"></div>
     <script type="text/javascript">
         function refresh() {
-            $('#joinedUsers').load('/Home/joinedToLobby');
+            var url = $("#joinedUrl").val();
+            $('#joinedUsers').load(url);
         }
         $(document).ready(function () {
             refresh();
