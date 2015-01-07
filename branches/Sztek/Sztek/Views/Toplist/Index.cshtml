@@ -1,16 +1,16 @@
-﻿@using Sztek.Models
-@model IEnumerable<Sztek.Models.toplistModel>
+﻿@model IEnumerable<Sztek.Models.toplistModel>
 @{
     
     ViewBag.Title = "Toplista";
 }
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+    <h2>@ViewBag.Message</h2>
+</hgroup>
 
-<h2>Toplista</h2>
 <article>
     @if (Model.Any())
     {
-
-
         <p>
             Az eddig lejátszott játékok alapján az alábbi toplista állt fel:
         </p>

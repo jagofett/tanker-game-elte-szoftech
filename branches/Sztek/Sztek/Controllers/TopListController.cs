@@ -18,8 +18,7 @@ namespace Sztek.Controllers
         {
             var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
             if (current == null)
-                return RedirectToAction("Index");
-
+                return RedirectToAction("NotLoggedIn", "Home");
 
             var users = _entities.Users.Include("results").ToList();
             var toplists = (from user in users
