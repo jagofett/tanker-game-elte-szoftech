@@ -222,7 +222,11 @@ namespace Sztek.Controllers
             if (id == null)
                 return RedirectToAction("Index", "Home");
 
-            var model = "";
+            var model = _database.Users.FirstOrDefault(x => x.id == (int) id);
+            if (model != null)
+            {
+                ViewBag.Title = model.username + " adatai";
+            }
             return View(model);
         }
 
