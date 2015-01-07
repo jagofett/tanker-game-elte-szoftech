@@ -224,7 +224,6 @@ namespace Sztek.Controllers
 
             var model = "";
             return View(model);
-
         }
 
 
