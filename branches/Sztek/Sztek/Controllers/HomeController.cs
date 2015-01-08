@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Management;
 using System.Web.Mvc;
+using Antlr.Runtime.Tree;
 using Sztek.Models;
 using WebMatrix.WebData;
 
@@ -60,7 +62,7 @@ namespace Sztek.Controllers
             }
         }
 
-        public ActionResult Lobby()
+        public ActionResult Lobby(int? startId)
         {
             if (Request.IsAuthenticated)
             {
@@ -71,6 +73,8 @@ namespace Sztek.Controllers
                 ViewBag.Message = current.in_lobby.GetValueOrDefault()
                     ? "Kilépés"
                     : "Csatlakozás";
+                ViewBag.GameStartId = startId;
+                ViewBag.GameStart = startId != null;
 
                 return View(_entities);
             }
@@ -86,28 +90,62 @@ namespace Sztek.Controllers
             var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
             if (current == null)
                 return RedirectToAction("Index");
+            int? id = null;
 
-            current.in_lobby = !current.in_lobby.GetValueOrDefault();
-            _entities.SaveChanges();
-
-            var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool) x.in_lobby).ToList();
-            if (inLobby.Count() >= 4)
+            if (current.game == null)
             {
-                var newGame = new games() {max_player = 4, users = inLobby, status = true};
-                _entities.Games.Add(newGame);
-                inLobby.ForEach(x => { x.in_lobby = false;
-                                         x.game = newGame;
-                });
-                //egyéb game  indítás...
+
+
+                current.in_lobby = !current.in_lobby.GetValueOrDefault();
+                _entities.SaveChanges();
+
+                var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool) x.in_lobby).ToList();
+                if (inLobby.Count() >= 1)
+                {
+                    var newGame = new games() {max_player = 4, users = inLobby, status = true};
+                    var gid = _entities.Games.Add(newGame);
+                    inLobby.ForEach(x =>
+                    {
+                        x.in_lobby = false;
+                        x.game = newGame;
+                    });
+                    //egyéb game  indítás...
+                    id = _entities.SaveChanges();
+
+                    id = newGame.id;
+                }
+
+
+                ViewBag.Message = current.in_lobby.GetValueOrDefault()
+                    ? "Kilépés"
+                    : "Csatlakozás";
             }
+            return RedirectToAction("Lobby", "Home", new {startId = id});
+        }
+
+        public JsonResult EndGameResult(int gameId, int winnerId)
+        {
+            var game = _entities.Games.FirstOrDefault(i => i.id == gameId);
+            var winner = _entities.Users.FirstOrDefault(us => us.id == winnerId);
+            if (game == null || winner == null || !game.status)
+            {
+                return Json(new {error = true, message = "Hiányzó adat!"}, JsonRequestBehavior.AllowGet);
+            }
+            game.status = false;
+            var result = new results {games = game, users = winner, score = 1};
+            _entities.Results.Add(result);
+            game.users.ToList().ForEach(us => { us.game = null; });
 
             _entities.SaveChanges();
 
-            ViewBag.Message = current.in_lobby.GetValueOrDefault()
-                ? "Kilépés"
-                : "Csatlakozás";
+            return Json(new {error = false}, JsonRequestBehavior.AllowGet);
+        }
 
-            return RedirectToAction("Lobby", "Home");
+        public ActionResult EndGameSample()
+        {
+            return View();
         }
     }
+
+
 }

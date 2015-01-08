@@ -97,6 +97,8 @@ namespace Sztek.Models
 
         [Display(Name = "Leírás")]
         public string Description { get; set; }
+
+
     }
 
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
@@ -12,6 +13,7 @@ namespace Sztek.Models
         public int id { get; set; }
         
         [DisplayName("Felhasználónév")]
+        [Required(ErrorMessage = "A felhasználónevet kötelező megadni!")]
         public string username { get; set; }
 
         [DisplayName("Játékok")]

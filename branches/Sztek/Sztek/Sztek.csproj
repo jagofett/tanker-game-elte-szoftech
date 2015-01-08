@@ -216,6 +216,7 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\EditUserModel.cs" />
     <Compile Include="Models\games.cs" />
     <Compile Include="Models\lobby.cs" />
     <Compile Include="Models\results.cs" />
@@ -354,6 +355,7 @@
     <Content Include="Views\Home\JoinedToLobby.cshtml" />
     <Content Include="Views\Toplist\Index.cshtml" />
     <Content Include="Views\Account\Details.cshtml" />
+    <Content Include="Views\Home\EndGameSample.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

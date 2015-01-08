@@ -151,15 +151,22 @@ namespace Sztek.Controllers
                 : "";
             ViewBag.HasLocalPassword = OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
             ViewBag.ReturnUrl = Url.Action("Manage");
-            return View();
+
+            var name = User.Identity.Name;
+            var user = _database.Users.FirstOrDefault(us => us.username == name);
+            var model = new EditUserModel {UserModel = user};
+
+            return View(model);
         }
 
         //
         // POST: /Account/Manage
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Manage(LocalPasswordModel model)
+        public ActionResult Manage(EditUserModel editModel)
         {
+
+            var model = editModel.PasswordModel;
             bool hasLocalAccount = OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
             ViewBag.HasLocalPassword = hasLocalAccount;
             ViewBag.ReturnUrl = Url.Action("Manage");
@@ -211,11 +218,38 @@ namespace Sztek.Controllers
                     }
                 }
             }
-
+            editModel.PasswordModel = model;
             // If we got this far, something failed, redisplay form
-            return View(model);
+            return View(editModel);
         }
 
+        public ActionResult Edit(EditUserModel editModel)
+        {
+            var model = editModel.UserModel;
+            ModelState.Remove("LocalPasswordModel");
+            var name = User.Identity.Name;
+            var user = _database.Users.FirstOrDefault(us => us.username == name);
+            if (!ModelState.IsValid || user == null)
+            {
+                return View("Manage", editModel);
+            }
+
+            
+            //user.username = model.username;
+            user.description = model.description;
+            user.country = model.country;
+            try
+            {
+                _database.SaveChanges();
+
+            }
+            catch (Exception)
+            {
+                
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
 
         public ActionResult Details(int? id)
         {
