@@ -29,7 +29,15 @@
         });
     </script>
 
-    @section scripts {
+@if (ViewBag.GameStart is bool? && (bool?)ViewBag.GameStart != null && (bool)ViewBag.GameStart )
+{
+    
+    <script>
+        alert("Game started with id: " + @(ViewBag.GameStartId) );
+    </script>
+}
+
+@section scripts {
         <!--Script references. -->
         <!--The jQuery library is required and is referenced by default in _Layout.cshtml. -->
         <!--Reference the SignalR library. -->

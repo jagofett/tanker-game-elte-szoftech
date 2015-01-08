@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "EndGameSample";
+}
+
+<h2>EndGameSample</h2>
+@Html.Hidden("endGameUrl",Url.Action("EndGameResult","Home",new {@id= "endGameUrl"}))
+<script>
+    $(document).ready(function() {
+        $("#simulate").click(function(e) {
+            e.preventDefault();
+            var win = $("#winnerId").val();
+            var url = $("#endGameUrl").val();
+            var game = $("#gameId").val();
+            $('#result').load(url, {gameId: game, winnerId: win});
+        });
+    })
+
+
+</script>
+<div id="result"></div>
+
+<label for="gameId">Azonosító:</label>
+<input id="gameId" placeholder="Add meg a szimulált játék azonosítóját"/>
+
+<label for="winnerId">Nyertes Id:</label>
+<input id="winnerId" placeholder="Add meg a szimulált játék győztesének azonosítóját"/>
+
+<button id="simulate">Vége</button>
