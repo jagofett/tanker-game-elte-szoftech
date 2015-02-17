@@ -6,17 +6,17 @@
         @* a displayNameFor működéséhez a users táblába kellenek [DisplayName("Név")] atribútumok az egyes propertikre, a toplistModel alapján *@
         <li>
             @Html.DisplayNameFor(x => x.username):
-            @Html.LabelFor(x => x.username)
+            @Html.Label(Model.username)
         </li>
 
         <li>
             @Html.DisplayNameFor(x => x.country):
-            @Html.LabelFor(x =>x.country)
+            @Html.Label(Model.country)
         </li>
 
         <li>
             @Html.DisplayNameFor(x => x.description):
-            @Html.LabelFor(x => x.description)
+            @Html.Label(Model.description)
         </li>
 
         <li>
