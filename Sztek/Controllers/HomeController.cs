@@ -42,23 +42,28 @@ namespace Sztek.Controllers
             return View();
         }
 
-        public ActionResult JoinedToLobby()
+        public JsonResult JoinedToLobby()
         {
             if (Request.IsAuthenticated)
             {
                 var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
                 if (current == null)
-                    return RedirectToAction("Index");
+                    return Json(new {error = true, redirect = true, auth = true}, JsonRequestBehavior.AllowGet);
+                var userInLobby =
+                    _entities.Users.Where(user => user.in_lobby != null && (bool) user.in_lobby)
+                        .OrderBy(us => us.username)
+                        .Select(x => x.username)
+                        .ToList();
 
-                ViewBag.Message = current.in_lobby.GetValueOrDefault()
+                var message = current.in_lobby.GetValueOrDefault()
                     ? "Kilépés"
                     : "Csatlakozás";
 
-                return PartialView(_entities);
+                return Json(new {error = false, users = userInLobby, messagge = message}, JsonRequestBehavior.AllowGet);
             }
             else
             {
-                return RedirectToAction("NotLoggedIn", "Home");
+                return Json(new { error = true, redirect = true, auth = false }, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -89,7 +94,7 @@ namespace Sztek.Controllers
         {
             var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
             if (current == null)
-                return RedirectToAction("Index");
+                return null;
             int? id = null;
 
             if (current.game == null)
@@ -100,7 +105,7 @@ namespace Sztek.Controllers
                 _entities.SaveChanges();
 
                 var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool) x.in_lobby).ToList();
-                if (inLobby.Count() >= 1)
+                if (inLobby.Count() >= 2)
                 {
                     var newGame = new games() {max_player = 4, users = inLobby, status = true};
                     var gid = _entities.Games.Add(newGame);
@@ -120,7 +125,7 @@ namespace Sztek.Controllers
                     ? "Kilépés"
                     : "Csatlakozás";
             }
-            return RedirectToAction("Lobby", "Home", new {startId = id});
+            return Json(new {startId = id}, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult EndGameResult(int gameId, int winnerId)

@@ -5,6 +5,7 @@
 }
 
 @Html.Hidden("joinedUrl",Url.Action("JoinedToLobby","Home",new {@id= "joinedUrl"}))
+@Html.Hidden("joinUrl",Url.Action("JoinLobby","Home"))
     <h2>Váróterem</h2>
     <section style="float: right">
         <div class="container">
@@ -17,25 +18,50 @@
             </div>
         </div>
     </section>
-    <div id="joinedUsers"></div>
+<div id="joinedUsers">
+    
+    <section>
+        <h3>Várakozó felhasználók</h3>
+        <ul id="waitingUsersList">
+           
+        </ul>
+
+            <button id="joinLobby" type="submit">Csatlakozás</button>
+        
+    </section>
+</div>
     <script type="text/javascript">
         function refresh() {
             var url = $("#joinedUrl").val();
-            $('#joinedUsers').load(url);
+            $.getJSON(url, function(json) {
+                if (json.error) {
+                    if (json.auth) {
+                        window.location = "/Index";
+                    }
+                }
+                $("#waitingUsersList").empty();
+                for (var user in json.users) {
+                    $("<li />", { html: user }).appendTo("#waitingUsersList");
+                }
+            });
+            //$('#joinedUsers').load(url);
         }
         $(document).ready(function () {
             refresh();
             setInterval(refresh, 1000);
+            $("#joinLobby").click(function(e) {
+                e.preventDefault();
+                var url = $("#joinUrl").val();
+                $.post(url, function(res) {
+                    refresh();
+                    if (res.startId) {
+                        alert("Game started with id: " + res.StartId);
+                    }
+                });
+            });
         });
     </script>
 
-@if (ViewBag.GameStart is bool? && (bool?)ViewBag.GameStart != null && (bool)ViewBag.GameStart )
-{
-    
-    <script>
-        alert("Game started with id: " + @(ViewBag.GameStartId) );
-    </script>
-}
 
 @section scripts {
         <!--Script references. -->
