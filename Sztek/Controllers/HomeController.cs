@@ -53,7 +53,7 @@ namespace Sztek.Controllers
                     _entities.Users.Where(user => user.in_lobby != null && (bool) user.in_lobby)
                         .OrderBy(us => us.username)
                         .Select(x => x.username)
-                        .ToList();
+                        .ToArray();
 
                 var message = current.in_lobby.GetValueOrDefault()
                     ? "Kilépés"
@@ -96,7 +96,8 @@ namespace Sztek.Controllers
             if (current == null)
                 return null;
             int? id = null;
-
+            var error = true;
+            string btnString = "Csatlakozás";
             if (current.game == null)
             {
 
@@ -105,7 +106,7 @@ namespace Sztek.Controllers
                 _entities.SaveChanges();
 
                 var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool) x.in_lobby).ToList();
-                if (inLobby.Count() >= 2)
+                if (inLobby.Count() >= 4)
                 {
                     var newGame = new games() {max_player = 4, users = inLobby, status = true};
                     var gid = _entities.Games.Add(newGame);
@@ -119,13 +120,13 @@ namespace Sztek.Controllers
 
                     id = newGame.id;
                 }
+                error = false;
 
-
-                ViewBag.Message = current.in_lobby.GetValueOrDefault()
+                btnString = current.in_lobby.GetValueOrDefault()
                     ? "Kilépés"
                     : "Csatlakozás";
             }
-            return Json(new {startId = id}, JsonRequestBehavior.AllowGet);
+            return Json(new {startId = id, error = error, btnStr = btnString}, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult EndGameResult(int gameId, int winnerId)
