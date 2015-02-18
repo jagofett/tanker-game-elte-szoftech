@@ -30,7 +30,7 @@ else
         <ol>
             <li>
                 @Html.LabelFor(m => m.UserModel.username)
-                @Html.EditorFor(m => m.UserModel.username, new{@readonly = "readonly"})
+                @Html.TextBoxFor(m => m.UserModel.username, new{@readonly = "readonly"})
             </li>
             <li>
                 @Html.LabelFor(m => m.UserModel.country)
