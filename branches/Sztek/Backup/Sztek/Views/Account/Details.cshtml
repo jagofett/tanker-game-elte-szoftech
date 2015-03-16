@@ -1,0 +1,32 @@
+﻿@model Sztek.Models.users
+
+<h2>@ViewBag.Title</h2>
+<article>
+    <ul>
+        @* a displayNameFor működéséhez a users táblába kellenek [DisplayName("Név")] atribútumok az egyes propertikre, a toplistModel alapján *@
+        <li>
+            @Html.DisplayNameFor(x => x.username):
+            @Html.Label(Model.username)
+        </li>
+
+        <li>
+            @Html.DisplayNameFor(x => x.country):
+            @Html.Label(Model.country)
+        </li>
+
+        <li>
+            @Html.DisplayNameFor(x => x.description):
+            @Html.Label(Model.description)
+        </li>
+
+        <li>
+            @Html.DisplayNameFor(x => x.in_lobby):
+            @if (Model.in_lobby.GetValueOrDefault()) {  
+                @Html.Label("Igen"); 
+            }
+            else { 
+                @Html.Label("Nem"); 
+            }
+        </li>
+    </ul>
+</article>

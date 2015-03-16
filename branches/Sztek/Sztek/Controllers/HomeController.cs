@@ -9,13 +9,21 @@ using System.Web.Mvc;
 using Antlr.Runtime.Tree;
 using Sztek.Models;
 using WebMatrix.WebData;
-
+using SignalRChatApp.Hubs;
 
 namespace Sztek.Controllers
 {
     public class HomeController : Controller
     {       
-        private DatabaseEntities _entities = new DatabaseEntities();
+        private readonly DatabaseEntities _entities = new DatabaseEntities();
+        private readonly HubHandler _hubHandler;
+
+        public HomeController() : this(HubHandler.Instance) { }
+
+        public HomeController(HubHandler hubHandler)
+        {
+            _hubHandler = hubHandler;
+        }
         public ActionResult Index()
         {
             ViewBag.Message = "";
@@ -40,6 +48,11 @@ namespace Sztek.Controllers
         public ActionResult NotLoggedIn()
         {
             return View();
+        }
+
+        public void GetLobbyList()
+        {
+            _hubHandler.LobbyList(LobbyUsers());
         }
 
         public JsonResult JoinedToLobby()
@@ -67,13 +80,23 @@ namespace Sztek.Controllers
             }
         }
 
+        private Object LobbyUsers()
+        {
+            return _entities.Users.Where(user => user.in_lobby != null && (bool)user.in_lobby)
+                        .OrderBy(us => us.username)
+                        .Select(x => new { x.username, x.id})
+                        .ToList();
+        }
+
         public ActionResult Lobby(int? startId)
         {
             if (Request.IsAuthenticated)
             {
                 var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
                 if (current == null)
+                {
                     return RedirectToAction("Index");
+                }
 
                 ViewBag.Message = current.in_lobby.GetValueOrDefault()
                     ? "Kilépés"
@@ -104,7 +127,9 @@ namespace Sztek.Controllers
 
                 current.in_lobby = !current.in_lobby.GetValueOrDefault();
                 _entities.SaveChanges();
-
+                //send the new lobby to users
+                GetLobbyList();
+                //if the lobby is full, start the game - todo new method!!
                 var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool) x.in_lobby).ToList();
                 if (inLobby.Count() >= 4)
                 {
@@ -126,7 +151,8 @@ namespace Sztek.Controllers
                     ? "Kilépés"
                     : "Csatlakozás";
             }
-            return Json(new {startId = id, error = error, btnStr = btnString}, JsonRequestBehavior.AllowGet);
+
+            return Json(new {error = error, btnStr = btnString}, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult EndGameResult(int gameId, int winnerId)

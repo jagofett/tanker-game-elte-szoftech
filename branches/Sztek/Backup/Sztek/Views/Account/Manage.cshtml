@@ -1,0 +1,53 @@
+﻿@using System.Data.Entity.Core.Metadata.Edm
+@model Sztek.Models.EditUserModel
+@{
+    ViewBag.Title = "Profil szerkesztése";
+}
+
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+</hgroup>
+
+<p class="message-success">@ViewBag.StatusMessage</p>
+
+<p>Be vagy jelentkezve <strong>@User.Identity.Name</strong> felhasználóval.</p>
+
+@if (ViewBag.HasLocalPassword)
+{
+    @Html.Partial("_ChangePasswordPartial")
+
+}
+else
+{ 
+    @Html.Partial("_SetPasswordPartial")
+}
+
+@using (Html.BeginForm("Edit", "Account")) {
+    @Html.AntiForgeryToken()
+
+    <fieldset>
+        <legend>Change User Form</legend>
+        <ol>
+            <li>
+                @Html.LabelFor(m => m.UserModel.username)
+                @Html.TextBoxFor(m => m.UserModel.username, new{@readonly = "readonly"})
+            </li>
+            <li>
+                @Html.LabelFor(m => m.UserModel.country)
+                @Html.EditorFor(m => m.UserModel.country)
+            </li>
+            <li>
+                @Html.LabelFor(m => m.UserModel.description)
+                @Html.EditorFor(m => m.UserModel.description)
+            </li>
+        </ol>
+        @Html.ValidationSummary()
+
+        <input type="submit" value="Mentés" />
+    </fieldset>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,20 @@
+﻿@model Sztek.Models.DatabaseEntities
+
+<section>
+    <h3>Várakozó felhasználók</h3>
+    <ul id="waitingUsersList">
+        @foreach (var user in Model.Users)
+        {
+            if ((@user.in_lobby).GetValueOrDefault())
+            {
+                <li>
+                    @user.username
+                </li>
+            }
+        }
+    </ul>
+    @using (Html.BeginForm("JoinLobby", "Home"))
+    {
+        <button type="submit">@ViewBag.Message</button>
+    }
+</section>
