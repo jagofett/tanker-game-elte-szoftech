@@ -6,6 +6,7 @@
 
 @Html.Hidden("joinedUrl",Url.Action("GetLobbyList","Home"))
 @Html.Hidden("joinUrl",Url.Action("JoinLobby","Home"))
+
     <h2>Váróterem</h2>
     <section style="float: right">
         <div class="container">
@@ -23,7 +24,7 @@
     <section>
         <h3>Várakozó felhasználók</h3>
         <ul id="waitingUsersList">
-           
+            <li>Betöltés...</li>
         </ul>
 
             <button id="joinLobby" type="submit">@ViewBag.Message</button>
@@ -37,7 +38,7 @@
             //$('#joinedUsers').load(url);
         }
         $(document).ready(function () {
-            refresh();
+            //refresh();
             //setInterval(refresh, 1000);
             $("#joinLobby").click(function(e) {
                 e.preventDefault();
@@ -77,12 +78,33 @@
                     $('#discussion').append('<li><strong>' + htmlEncode(name)
                         + '</strong>: ' + htmlEncode(message) + '</li>');
                 };
-                chat.client.lobbyList = function(userList) {
+                chat.client.lobbyList = function (userList) {
+                    var currentName = $("#displayname").val();
                     $("#waitingUsersList").empty();
                     console.log(userList);
-
+                    var message = "Csatlakozás";
                     for (var user in userList) {
-                        $("<li />", { html: userList[user].username }).appendTo("#waitingUsersList");
+                        var userName = userList[user].username;
+                        $("<li />", { html: userName }).appendTo("#waitingUsersList");
+                        if (currentName == userName) {
+                            message = "Kilépés";
+                        }
+                    }
+                    $("#joinLobby").html(message);
+                };
+
+                chat.client.startGame = function(userList) {
+                    var currentName = $("#displayname").val();
+                    var isPlaying = false;
+                    for (var i = 0; i < userList.length; i++) {
+                        if (currentName == userList[i].username) {
+                            isPlaying = true;
+                            break;
+                        }
+                    }
+                    if (isPlaying) {
+                        //todo játék indítása
+                        console.log(userList[i]);
                     }
                 };
 
@@ -92,6 +114,7 @@
                 $('#message').focus();
                 // Start the connection.
                 $.connection.hub.start().done(function () {
+                    refresh();
                     $('#sendmessage').click(function () {
                         // Call the Send method on the hub.
                         chat.server.send($('#displayname').val(), $('#message').val());

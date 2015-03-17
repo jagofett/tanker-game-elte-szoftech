@@ -52,33 +52,13 @@ namespace Sztek.Controllers
 
         public void GetLobbyList()
         {
-            _hubHandler.LobbyList(LobbyUsers());
-        }
-
-        public JsonResult JoinedToLobby()
-        {
             if (Request.IsAuthenticated)
             {
-                var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
-                if (current == null)
-                    return Json(new {error = true, redirect = true, auth = true}, JsonRequestBehavior.AllowGet);
-                var userInLobby =
-                    _entities.Users.Where(user => user.in_lobby != null && (bool) user.in_lobby)
-                        .OrderBy(us => us.username)
-                        .Select(x => x.username)
-                        .ToArray();
-
-                var message = current.in_lobby.GetValueOrDefault()
-                    ? "Kilépés"
-                    : "Csatlakozás";
-
-                return Json(new {error = false, users = userInLobby, messagge = message}, JsonRequestBehavior.AllowGet);
-            }
-            else
-            {
-                return Json(new { error = true, redirect = true, auth = false }, JsonRequestBehavior.AllowGet);
+                _hubHandler.LobbyList(LobbyUsers());
             }
         }
+
+
 
         private Object LobbyUsers()
         {
@@ -88,6 +68,7 @@ namespace Sztek.Controllers
                         .ToList();
         }
 
+        //todo exit lobby when leaving!
         public ActionResult Lobby(int? startId)
         {
             if (Request.IsAuthenticated)
@@ -101,8 +82,9 @@ namespace Sztek.Controllers
                 ViewBag.Message = current.in_lobby.GetValueOrDefault()
                     ? "Kilépés"
                     : "Csatlakozás";
-                ViewBag.GameStartId = startId;
-                ViewBag.GameStart = startId != null;
+
+                ViewBag.UserName = current.username;
+                ViewBag.Id = current.id;
 
                 return View(_entities);
             }
@@ -131,7 +113,7 @@ namespace Sztek.Controllers
                 GetLobbyList();
                 //if the lobby is full, start the game - todo new method!!
                 var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool) x.in_lobby).ToList();
-                if (inLobby.Count() >= 4)
+                if (inLobby.Count() >= 2)
                 {
                     var newGame = new games() {max_player = 4, users = inLobby, status = true};
                     var gid = _entities.Games.Add(newGame);
@@ -141,8 +123,10 @@ namespace Sztek.Controllers
                         x.game = newGame;
                     });
                     //egyéb game  indítás...
-                    id = _entities.SaveChanges();
-
+                    _entities.SaveChanges();
+                    var userList = inLobby.Select(x => new { x.username, userId = x.id, gameId = newGame.id });
+                    _hubHandler.StartGame(userList);
+                    GetLobbyList();
                     id = newGame.id;
                 }
                 error = false;
