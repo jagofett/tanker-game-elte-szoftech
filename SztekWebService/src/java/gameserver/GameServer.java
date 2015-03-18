@@ -20,6 +20,7 @@ import java.util.HashMap;
 public final class GameServer {
 
     private int port;
+    public String gameId;
     private ServerSocket ss;
     private ArrayList<Connection> connectionList;
     private Game game;
@@ -27,7 +28,8 @@ public final class GameServer {
     private ArrayList<Integer> playerIDs;
     private HashMap<Integer, Integer> playerIDsWithPositions;
 
-    public GameServer(String port, String[] args) throws IOException {
+    public GameServer(String port, String gameId, String[] args) throws IOException {
+        this.gameId = gameId;
         this.port = Integer.parseInt(port);
         ss = new ServerSocket(this.port);
         connectionList = new ArrayList<>();

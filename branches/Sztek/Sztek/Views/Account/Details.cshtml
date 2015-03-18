@@ -11,12 +11,12 @@
 
         <li>
             @Html.DisplayNameFor(x => x.country):
-            @Html.Label(Model.country)
+            @Html.Label(Model.country ?? "")
         </li>
 
         <li>
             @Html.DisplayNameFor(x => x.description):
-            @Html.Label(Model.description)
+            @Html.Label(Model.description ?? "")
         </li>
 
         <li>

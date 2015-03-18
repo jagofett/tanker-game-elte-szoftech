@@ -11,6 +11,14 @@ import static java.awt.event.KeyEvent.VK_LEFT;
 import static java.awt.event.KeyEvent.VK_RIGHT;
 import static java.awt.event.KeyEvent.VK_SPACE;
 import static java.awt.event.KeyEvent.VK_UP;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -353,32 +361,17 @@ public class GameLogic {
     public synchronized void writeWinnerToDatabase(int winnerId) {
 
         try {
-
-            Driver driver = (Driver) (Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance());
-
-            String url = "jdbc:derby://localhost:1527/testDB";
-
-            Properties prop = new Properties();
-            prop.put("user", "bobszi");
-            prop.put("password", "bobszi");
-
-            java.sql.Connection connection = driver.connect(url, prop);
-
-            Statement statement = connection.createStatement();
-
-            String sql = "INSERT INTO Winners "
-                    + "VALUES (" + winnerId + ")";
-            statement.executeUpdate(sql);
-
-            connection.close();
-
-        } catch (ClassNotFoundException ex) {
+            final URL url = new URL("http://www.tanker.somee.com/Home/EndGameResult");
+            HttpURLConnection myConnection = (HttpURLConnection) url.openConnection();
+            myConnection.setRequestMethod("POST");
+            myConnection.setDoOutput(true);
+            
+            DataOutputStream wr = new DataOutputStream(myConnection.getOutputStream ());
+            
+            wr.writeBytes("gameId=" + this.gameServer.gameId + "&winnerId=" + winnerId);
+        } catch (MalformedURLException ex) {
             Logger.getLogger(GameLogic.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(GameLogic.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(GameLogic.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(GameLogic.class.getName()).log(Level.SEVERE, null, ex);
         }
 

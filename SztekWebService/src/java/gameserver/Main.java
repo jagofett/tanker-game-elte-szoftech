@@ -5,25 +5,20 @@ import javax.jws.WebService;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jws.WebParam;
 
 @WebService(serviceName = "Main")
 public class Main {
 
     @WebMethod(operationName = "startGameServer")
-    public String startGameServer(@WebParam(name = "serverPort") final String serverPort,
-                                @WebParam(name = "ip1") String ip1, 
-                                @WebParam(name = "ip2") String ip2, 
-                                @WebParam(name = "ip3") String ip3, 
-                                @WebParam(name = "ip4") String ip4) throws IOException {
+    public String startGameServer(String serverPort, String gameId, String id1, String id2, String id3, String id4) throws IOException {
 
-        final String[] IPs = {ip1, ip2, ip3, ip4} ;
+        String[] IPs = {id1, id2, id3, id4} ;
         
         new Thread(new Runnable() {
             @Override
-            public void run() {
+            public void run() { 
                 try {
-                    GameServer gameServer = new GameServer(serverPort, IPs);
+                    GameServer gameServer = new GameServer(serverPort, gameId, IPs);
                 } catch (IOException ex) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 }
