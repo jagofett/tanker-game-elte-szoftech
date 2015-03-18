@@ -10,6 +10,7 @@ using Antlr.Runtime.Tree;
 using Sztek.Models;
 using WebMatrix.WebData;
 using SignalRChatApp.Hubs;
+using Sztek.SztekWebServiceReference;
 
 namespace Sztek.Controllers
 {
@@ -17,6 +18,7 @@ namespace Sztek.Controllers
     {       
         private readonly DatabaseEntities _entities = new DatabaseEntities();
         private readonly HubHandler _hubHandler;
+        
 
         public HomeController() : this(HubHandler.Instance) { }
 
@@ -41,6 +43,7 @@ namespace Sztek.Controllers
         public ActionResult Contact()
         {
             ViewBag.Message = "";
+
 
             return View();
         }
@@ -124,6 +127,12 @@ namespace Sztek.Controllers
                     });
                     //egyéb game  indítás...
                     _entities.SaveChanges();
+                    //soap hívás, server instance létrehozása
+                    var port = (newGame.id % 10000) + 10000;
+                    var users = inLobby.Select(users1 => users1.id.ToString()).ToArray();
+                    var proxy = new MainClient();
+                    proxy.startGameServer(port.ToString(), users[0],users[1], users[2], users[3]);
+
                     var userList = inLobby.Select(x => new { x.username, userId = x.id, gameId = newGame.id });
                     _hubHandler.StartGame(userList);
                     GetLobbyList();
@@ -138,6 +147,7 @@ namespace Sztek.Controllers
 
             return Json(new {error = error, btnStr = btnString}, JsonRequestBehavior.AllowGet);
         }
+
 
         public JsonResult EndGameResult(int gameId, int winnerId)
         {

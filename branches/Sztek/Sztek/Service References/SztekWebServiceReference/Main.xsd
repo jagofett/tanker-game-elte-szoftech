@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://gameserver/" targetNamespace="http://gameserver/" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="IOException" type="tns:IOException" />
+  <xs:element name="startGameServer" type="tns:startGameServer" />
+  <xs:element name="startGameServerResponse" type="tns:startGameServerResponse" />
+  <xs:complexType name="startGameServer">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="serverPort" type="xs:string" />
+      <xs:element minOccurs="0" name="ip1" type="xs:string" />
+      <xs:element minOccurs="0" name="ip2" type="xs:string" />
+      <xs:element minOccurs="0" name="ip3" type="xs:string" />
+      <xs:element minOccurs="0" name="ip4" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="startGameServerResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IOException">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="message" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
