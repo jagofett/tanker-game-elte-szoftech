@@ -13,13 +13,70 @@ namespace Sztek.Controllers
         private readonly DatabaseEntities _entities = new DatabaseEntities();
         private readonly HubHandler _hubHandler;
 
+        public LobbyController() : this(HubHandler.Instance) { }
+
+        private LobbyController(HubHandler hubHandler)
+        {
+            _hubHandler = hubHandler;
+        }
+        [Authorize]
+        [HttpPost]
         public ActionResult JoinLobby()
         {
-            return View();
+            var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
+            if (current == null)
+                return null;
+            int? id = null;
+            var error = true;
+            string btnString = "Csatlakozás";
+            if (current.game == null)
+            {
+
+
+                current.in_lobby = !current.in_lobby.GetValueOrDefault();
+                _entities.SaveChanges();
+                //send the new lobby to users
+                GetLobbyList();
+                //if the lobby is full, start the game - todo new method!!
+                var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool)x.in_lobby).ToList();
+                if (inLobby.Count() >= 2)
+                {
+                    var newGame = new games() { max_player = 4, users = inLobby, status = true };
+                    var gid = _entities.Games.Add(newGame);
+                    inLobby.ForEach(x =>
+                    {
+                        x.in_lobby = false;
+                        x.game = newGame;
+                    });
+                    //egyéb game  indítás...
+                    _entities.SaveChanges();
+                    //soap hívás, server instance létrehozása
+                    var port = (newGame.id % 10000) + 10000;
+                    var users = inLobby.Select(users1 => users1.id.ToString()).ToArray();
+                    //var proxy = new MainClient();
+                    //proxy.startGameServer(port.ToString(), users[0],users[1], users[2], users[3]);
+
+                    var userList = inLobby.Select(x => new { x.username, userId = x.id, gameId = newGame.id });
+                    _hubHandler.StartGame(userList);
+                    GetLobbyList();
+                    id = newGame.id;
+                }
+                error = false;
+
+                btnString = current.in_lobby.GetValueOrDefault()
+                    ? "Kilépés"
+                    : "Csatlakozás";
+            }
+
+            return Json(new { error = error, btnStr = btnString }, JsonRequestBehavior.AllowGet);
         }
+
         public void GetLobbyList()
         {
-            
+            if (Request.IsAuthenticated)
+            {
+                _hubHandler.LobbyList(LobbyUsers());
+            }
         }
 
 
@@ -30,8 +87,12 @@ namespace Sztek.Controllers
 
         private Object LobbyUsers()
         {
-            return null;
+            return _entities.Users.Where(user => user.in_lobby != null && (bool)user.in_lobby)
+                        .OrderBy(us => us.username)
+                        .Select(x => new { x.username, x.id })
+                        .ToList();
         }
+
 
         public ActionResult Lobby()
         {

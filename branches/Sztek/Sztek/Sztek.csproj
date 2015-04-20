@@ -82,7 +82,6 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -239,11 +238,6 @@
     <Compile Include="Models\toplistModel.cs" />
     <Compile Include="Models\users.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service References\SztekWebServiceReference\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -313,6 +307,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Content\bootstrap.css.map" />
+    <Content Include="ClassDiagram1.cd" />
     <None Include="Properties\PublishProfiles\ftp.pubxml" />
     <None Include="Scripts\jquery-1.9.0.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />
@@ -336,12 +331,6 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\npm.js" />
     <Content Include="Scripts\removeAd.js" />
-    <None Include="Service References\SztekWebServiceReference\configuration91.svcinfo" />
-    <None Include="Service References\SztekWebServiceReference\configuration.svcinfo" />
-    <None Include="Service References\SztekWebServiceReference\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -385,13 +374,6 @@
     <Content Include="Views\Toplist\Index.cshtml" />
     <Content Include="Views\Account\Details.cshtml" />
     <Content Include="Views\Home\EndGameSample.cshtml" />
-    <None Include="Service References\SztekWebServiceReference\Main.wsdl" />
-    <None Include="Service References\SztekWebServiceReference\Main.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <Content Include="Service References\SztekWebServiceReference\Sztek.SztekWebServiceReference.startGameServerResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Content>
     <Content Include="Views\Lobby\Lobby.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -402,12 +384,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadataStorage Include="Service References\SztekWebServiceReference\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

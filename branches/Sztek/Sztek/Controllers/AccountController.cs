@@ -17,7 +17,7 @@ namespace Sztek.Controllers
     [InitializeSimpleMembership]
     public class AccountController : Controller
     {
-        DatabaseEntities _database = new DatabaseEntities();
+        DatabaseEntities _entities = new DatabaseEntities();
 
         //
         // GET: /Account/Login
@@ -56,11 +56,11 @@ namespace Sztek.Controllers
         {
             //kiléptetés a lobbiból
             var name = User.Identity.Name;
-            var user = _database.Users.FirstOrDefault(us => us.username == name);
+            var user = _entities.Users.FirstOrDefault(us => us.username == name);
             if (user != null)
             {
                 user.in_lobby = false;
-                _database.SaveChanges();
+                _entities.SaveChanges();
             }
             WebSecurity.Logout();
 
@@ -92,11 +92,11 @@ namespace Sztek.Controllers
                     
                     WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new { Description = model.Description, Country = model.Country, in_lobby = false});
                     var id = WebSecurity.GetUserId(model.UserName);
-                    var user = _database.Users.FirstOrDefault(us => us.id == id);
+                    var user = _entities.Users.FirstOrDefault(us => us.id == id);
                     if (user != null)
                     {
                         user.in_lobby = false;
-                        _database.SaveChanges();
+                        _entities.SaveChanges();
                     }
                     WebSecurity.Login(model.UserName, model.Password);
                     return RedirectToAction("Index", "Home");
@@ -153,7 +153,7 @@ namespace Sztek.Controllers
             ViewBag.ReturnUrl = Url.Action("Manage");
 
             var name = User.Identity.Name;
-            var user = _database.Users.FirstOrDefault(us => us.username == name);
+            var user = _entities.Users.FirstOrDefault(us => us.username == name);
             var model = new EditUserModel {UserModel = user};
 
             return View(model);
@@ -228,7 +228,7 @@ namespace Sztek.Controllers
             var model = editModel.UserModel;
             ModelState.Remove("LocalPasswordModel");
             var name = User.Identity.Name;
-            var user = _database.Users.FirstOrDefault(us => us.username == name);
+            var user = _entities.Users.FirstOrDefault(us => us.username == name);
             if (!ModelState.IsValid || user == null)
             {
                 return View("Manage", editModel);
@@ -240,7 +240,7 @@ namespace Sztek.Controllers
             user.country = model.country;
             try
             {
-                _database.SaveChanges();
+                _entities.SaveChanges();
 
             }
             catch (Exception)
@@ -256,7 +256,7 @@ namespace Sztek.Controllers
             if (id == null)
                 return RedirectToAction("Index", "Home");
 
-            var model = _database.Users.FirstOrDefault(x => x.id == (int) id);
+            var model = _entities.Users.FirstOrDefault(x => x.id == (int) id);
             if (model != null)
             {
                 ViewBag.Title = model.username + " adatai";
