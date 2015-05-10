@@ -35,11 +35,28 @@
 </div>
 
 <script type="text/javascript">
+    function joinToGame(gameID) {
+        alert("Ehhez a játékhoz csatlakoznál: " + gameID);
+
+        var url = '@Url.Action("JoinLobby", "Lobby")';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: { value: gameID},
+
+            success: function (result) {
+                $('#result').html(result);
+            }
+        });
+    }
+
     function refresh() {
         var url = $("#joinedUrl").val();
         $.getJSON(url, function() {});
         //$('#joinedUsers').load(url);
     }
+
     $(document).ready(function () {
         refresh();
         //setInterval(refresh, 1000);
@@ -102,13 +119,21 @@
 
                 for (var game in activeGamesList) {
                     var gameType;
-                    if (activeGamesList[game].gameType == 0) {
+                    if (activeGamesList[game].gameType == 0) 
                         gameType = "DeathMatch";
-                    }
-                    else {
+                    else
                         gameType = "TeamDeathMatch";
-                    }
-                    $("<li />", { html: activeGamesList[game].gameName + " (" + gameType + ")" }).appendTo("#activeGamesList");
+
+                    var buttonText;
+                    if (activeGamesList[game].hasCurrentUser == true)
+                        buttonText = "Megtekintés";
+                    else
+                        buttonText = "Csatlakozás";
+
+                    $("<li />", { html:
+                        "<button type='submit' onclick='joinToGame(" + activeGamesList[game].id + ")'>"+buttonText+"</button>" +
+                        activeGamesList[game].gameName + " (" + gameType + ")"
+                    }).appendTo("#activeGamesList");
                 }
             };
 
@@ -141,12 +166,12 @@
                     $('#message').val('').focus();
                 });
             });
-        });
-        // This optional function html-encodes messages for display in the page.
-        function htmlEncode(value) {
-            var encodedValue = $('<div />').text(value).html();
-            return encodedValue;
-        }
+            });
+            // This optional function html-encodes messages for display in the page.
+            function htmlEncode(value) {
+                var encodedValue = $('<div />').text(value).html();
+                return encodedValue;
+            }
     </script>
 
 }
