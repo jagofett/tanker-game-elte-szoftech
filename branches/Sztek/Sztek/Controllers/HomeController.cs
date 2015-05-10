@@ -56,7 +56,7 @@ namespace Sztek.Controllers
                 return Json(new {error = true, message = "Hiányzó adat!"}, JsonRequestBehavior.AllowGet);
             }
             game.status = false;
-            var result = new results {games = game, users = winner, score = 1};
+            var result = new results {game = game, user = winner, score = 1};
             _entities.Results.Add(result);
             game.users.ToList().ForEach(us => { us.game = null; });
 

@@ -33,19 +33,19 @@ namespace Sztek.Controllers
             {
 
 
-                current.in_lobby = !current.in_lobby.GetValueOrDefault();
+                current.inLobby = !current.inLobby.GetValueOrDefault();
                 _entities.SaveChanges();
                 //send the new lobby to users
                 GetLobbyList();
                 //if the lobby is full, start the game - todo new method!!
-                var inLobby = _entities.Users.Where(x => x.in_lobby != null && (bool)x.in_lobby).ToList();
+                var inLobby = _entities.Users.Where(x => x.inLobby != null && (bool)x.inLobby).ToList();
                 if (inLobby.Count() >= 2)
                 {
-                    var newGame = new games() { max_player = 4, users = inLobby, status = true };
+                    var newGame = new games() { users = inLobby, status = true };
                     var gid = _entities.Games.Add(newGame);
                     inLobby.ForEach(x =>
                     {
-                        x.in_lobby = false;
+                        x.inLobby = false;
                         x.game = newGame;
                     });
                     //egyéb game  indítás...
@@ -63,7 +63,7 @@ namespace Sztek.Controllers
                 }
                 error = false;
 
-                btnString = current.in_lobby.GetValueOrDefault()
+                btnString = current.inLobby.GetValueOrDefault()
                     ? "Kilépés"
                     : "Csatlakozás";
             }
@@ -87,7 +87,7 @@ namespace Sztek.Controllers
 
         private Object LobbyUsers()
         {
-            return _entities.Users.Where(user => user.in_lobby != null && (bool)user.in_lobby)
+            return _entities.Users.Where(user => user.inLobby != null && (bool)user.inLobby)
                         .OrderBy(us => us.username)
                         .Select(x => new { x.username, x.id })
                         .ToList();
@@ -104,7 +104,7 @@ namespace Sztek.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                ViewBag.Message = current.in_lobby.GetValueOrDefault()
+                ViewBag.Message = current.inLobby.GetValueOrDefault()
                     ? "Kilépés"
                     : "Csatlakozás";
 

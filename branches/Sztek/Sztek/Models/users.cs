@@ -21,7 +21,7 @@ namespace Sztek.Models
 
         [DisplayName("Játékra vár")]
         [DefaultValue(false)]
-        public bool? in_lobby { get; set; }
+        public bool? inLobby { get; set; }
 
         [DisplayName("Ország")]
         public string country { get; set; }
@@ -30,7 +30,7 @@ namespace Sztek.Models
         public string description { get; set; }
 
 
-        public virtual ICollection<lobby> lobby { get; set; }
+        public virtual ICollection<lobby> lobbyList { get; set; }
         public virtual ICollection<results> results { get; set; }
     }
 }

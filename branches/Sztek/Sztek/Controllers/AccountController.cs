@@ -59,7 +59,7 @@ namespace Sztek.Controllers
             var user = _entities.Users.FirstOrDefault(us => us.username == name);
             if (user != null)
             {
-                user.in_lobby = false;
+                user.inLobby = false;
                 _entities.SaveChanges();
             }
             WebSecurity.Logout();
@@ -95,7 +95,7 @@ namespace Sztek.Controllers
                     var user = _entities.Users.FirstOrDefault(us => us.id == id);
                     if (user != null)
                     {
-                        user.in_lobby = false;
+                        user.inLobby = false;
                         _entities.SaveChanges();
                     }
                     WebSecurity.Login(model.UserName, model.Password);
