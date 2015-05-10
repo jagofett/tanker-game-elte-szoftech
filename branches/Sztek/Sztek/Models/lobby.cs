@@ -12,7 +12,5 @@ namespace Sztek.Models
 
         public virtual ICollection<users> userList { get; set; }
         //public bool status { get; set; }
-
-
     }
 }

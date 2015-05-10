@@ -29,8 +29,8 @@ namespace Sztek.Models
         [DisplayName("Leírás")]
         public string description { get; set; }
 
-
         public virtual ICollection<lobby> lobbyList { get; set; }
+
         public virtual ICollection<results> results { get; set; }
     }
 }

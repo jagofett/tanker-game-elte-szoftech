@@ -30,6 +30,7 @@ namespace Sztek.Controllers
                     Id = user.id,
                     Score = score
                 }).OrderByDescending(x => x.Score).ThenBy(x => x.Name).ToList();
+
             for (var i = 0; i < toplists.Count; i++)
             {
                 toplists[i].Place = i + 1;
@@ -37,8 +38,5 @@ namespace Sztek.Controllers
 
             return View(toplists);
         }
-
-        
-
     }
 }

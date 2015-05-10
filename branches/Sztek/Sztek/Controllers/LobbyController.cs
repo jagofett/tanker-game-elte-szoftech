@@ -18,7 +18,9 @@ namespace Sztek.Controllers
         private LobbyController(HubHandler hubHandler)
         {
             _hubHandler = hubHandler;
+            _hubHandler.LobbyList(LobbyUsers());
         }
+
         [Authorize]
         [HttpPost]
         public ActionResult JoinLobby()
@@ -26,13 +28,24 @@ namespace Sztek.Controllers
             var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
             if (current == null)
                 return null;
+
             int? id = null;
             var error = true;
             string btnString = "Csatlakozás";
+
+            foreach (var g in _entities.Games)
+            {
+                if (g.gameName == null)
+                {
+                    g.gameName = g.gameType == 0
+                    ? "DeathMatch" + g.id
+                    : "TeamDeathMatch" + g.id;
+                }
+            }
+            _entities.SaveChanges();
+
             if (current.game == null)
             {
-
-
                 current.inLobby = !current.inLobby.GetValueOrDefault();
                 _entities.SaveChanges();
                 //send the new lobby to users
@@ -41,7 +54,11 @@ namespace Sztek.Controllers
                 var inLobby = _entities.Users.Where(x => x.inLobby != null && (bool)x.inLobby).ToList();
                 if (inLobby.Count() >= 2)
                 {
-                    var newGame = new games() { users = inLobby, status = true };
+                    var newGame = new games() { 
+                        gameType = 0,
+                        users = inLobby, 
+                        status = true 
+                    };
                     var gid = _entities.Games.Add(newGame);
                     inLobby.ForEach(x =>
                     {
@@ -50,6 +67,12 @@ namespace Sztek.Controllers
                     });
                     //egyéb game  indítás...
                     _entities.SaveChanges();
+                    var currentGame = _entities.Games.Last();
+                    currentGame.gameName = currentGame.gameType == 0
+                        ? "DeathMatch" + currentGame.id
+                        : "TeamDeathMatch" + currentGame.id;
+                    _entities.SaveChanges();
+
                     //soap hívás, server instance létrehozása
                     var port = (newGame.id % 10000) + 10000;
                     var users = inLobby.Select(users1 => users1.id.ToString()).ToArray();
@@ -76,9 +99,9 @@ namespace Sztek.Controllers
             if (Request.IsAuthenticated)
             {
                 _hubHandler.LobbyList(LobbyUsers());
+                _hubHandler.ActiveGamesList(ActiveGamesList());
             }
         }
-
 
         public JsonResult JoinedToLobby()
         {
@@ -93,6 +116,16 @@ namespace Sztek.Controllers
                         .ToList();
         }
 
+        private Object ActiveGamesList()
+        {
+            var games = _entities.Games;
+            var actives = games.Where(game => game.status != null && (bool)game.status)
+                        .OrderBy(game => game.id)
+                        .Select(x => new { x.gameName, x.gameType })
+                        .ToList();
+
+            return actives;
+        }
 
         public ActionResult Lobby()
         {

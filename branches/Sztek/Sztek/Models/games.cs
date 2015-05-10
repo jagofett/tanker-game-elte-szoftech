@@ -5,8 +5,11 @@ namespace Sztek.Models
     public class games
     {
         public int id { get; set; }
+
         public bool status { get; set; }
+
         public string gameName { get; set; }
+
         public int gameType { get; set; }
 
         public int teams { get; set; }

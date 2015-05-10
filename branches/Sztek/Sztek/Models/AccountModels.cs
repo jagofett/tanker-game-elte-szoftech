@@ -10,8 +10,7 @@ namespace Sztek.Models
 {
     public class DatabaseEntities : DbContext
     {
-        public DatabaseEntities()
-            : base("DefaultConnection")
+        public DatabaseEntities() : base("DefaultConnection")
         {
         }
 
@@ -23,7 +22,6 @@ namespace Sztek.Models
         public DbSet<userGame> UserGames { get; set; }
 
         //public DbSet<newLobby> NewLobby { get; set; }
-
     }
 
     //[Table("UserProfile")]
@@ -95,15 +93,10 @@ namespace Sztek.Models
         [Compare("Password", ErrorMessage = "A megadott két jelszó nem egyezik.")]
         public string ConfirmPassword { get; set; }
 
-
         [Display(Name = "Ország")]
         public string Country { get; set; }
 
         [Display(Name = "Leírás")]
         public string Description { get; set; }
-
-
     }
-
-
 }

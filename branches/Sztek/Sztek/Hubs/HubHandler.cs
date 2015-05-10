@@ -16,6 +16,7 @@ namespace SignalRChatApp.Hubs
         {
             _context = Context;
         }
+
         public static HubHandler Instance
         {
             get
@@ -28,7 +29,6 @@ namespace SignalRChatApp.Hubs
         {
             // Call the addNewMessageToPage method to update clients
             _context.Clients.All.addNewMessageToPage(name, message);
-
         }
 
         public void LobbyList(Object userList)
@@ -36,10 +36,14 @@ namespace SignalRChatApp.Hubs
             _context.Clients.All.lobbyList(userList);
         }
 
+        public void ActiveGamesList(Object activeGamesList)
+        {
+            _context.Clients.All.activeGamesList(activeGamesList);
+        }
+
         public void StartGame(Object userList)
         {
             _context.Clients.All.startGame(userList);
         }
-
     }
 }
