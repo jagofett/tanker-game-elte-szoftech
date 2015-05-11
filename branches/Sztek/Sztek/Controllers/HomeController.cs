@@ -58,7 +58,7 @@ namespace Sztek.Controllers
             game.status = false;
             var result = new results {game = game, user = winner, score = 1};
             _entities.Results.Add(result);
-            game.users.ToList().ForEach(us => { us.game = null; });
+            //game.users.ToList().ForEach(us => { us.game = null; });
 
             _entities.SaveChanges();
 

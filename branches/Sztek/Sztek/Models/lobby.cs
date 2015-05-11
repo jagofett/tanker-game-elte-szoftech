@@ -10,7 +10,7 @@ namespace Sztek.Models
         public bool isMainLobby { get; set; }
         public virtual games game { get; set; }
 
-        public virtual ICollection<users> userList { get; set; }
+        //public virtual ICollection<users> userList { get; set; }
         //public bool status { get; set; }
     }
 }

@@ -34,6 +34,8 @@ namespace Sztek.Controllers
             var error = true;
             string btnString = "Csatlakozás";
 
+            var games = _entities.UserGames.Where(u => u.user.id == current.id).ToList();
+
             if (current.game == null)
             {
                 current.inLobby = !current.inLobby.GetValueOrDefault();
@@ -46,7 +48,7 @@ namespace Sztek.Controllers
                 {
                     var newGame = new games() { 
                         gameType = 0,
-                        users = inLobby, 
+                        //users = inLobby, 
                         status = true 
                     };
                     var gid = _entities.Games.Add(newGame);
@@ -99,11 +101,12 @@ namespace Sztek.Controllers
                 current.inLobby = !current.inLobby.GetValueOrDefault();
                 
                 var game = _entities.Games.First(x => x.id == gameId);
+                /*
                 if (!game.users.Contains(current))
                     game.users.Add(current);
                 else
                     game.users.Remove(current);
-
+                */
                 _entities.SaveChanges();
 
                 error = false;
@@ -152,8 +155,10 @@ namespace Sztek.Controllers
             List<object> act = new List<object>();
             foreach (var a in actives)
             {
+                /*
                 var users = _entities.Games.Where(g => g.id == a.id).First().users.Select(u => u.username).ToArray();
                 act.Add(new { a.gameName, a.gameType, a.id, users });
+                */
             }
 
             return act;

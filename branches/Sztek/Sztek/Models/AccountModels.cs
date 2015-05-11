@@ -18,7 +18,7 @@ namespace Sztek.Models
         public DbSet<users> Users { get; set; }
         public DbSet<results> Results { get; set; }
         public DbSet<games> Games { get; set; }
-        public DbSet<lobby> Lobby { get; set; }
+        //public DbSet<lobby> Lobby { get; set; }
         public DbSet<userGame> UserGames { get; set; }
 
         //public DbSet<newLobby> NewLobby { get; set; }

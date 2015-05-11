@@ -16,7 +16,7 @@ namespace Sztek.Models
 
         //public int max_player { get; set; }
 
-        public virtual ICollection<users> users { get; set; }
+        //public virtual ICollection<users> users { get; set; }
         public virtual ICollection<results> results { get; set; }
     }
 }

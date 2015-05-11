@@ -16,7 +16,7 @@ namespace Sztek.Models
         [Required(ErrorMessage = "A felhasználónevet kötelező megadni!")]
         public string username { get; set; }
 
-        [DisplayName("Játékok")]
+        [DisplayName("Aktív játék")]
         public virtual games game { get; set; }
 
         [DisplayName("Játékra vár")]
@@ -29,7 +29,7 @@ namespace Sztek.Models
         [DisplayName("Leírás")]
         public string description { get; set; }
 
-        public virtual ICollection<lobby> lobbyList { get; set; }
+        //public virtual ICollection<lobby> lobbyList { get; set; }
 
         public virtual ICollection<results> results { get; set; }
     }
