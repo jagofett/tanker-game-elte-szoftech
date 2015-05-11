@@ -37,19 +37,30 @@
 </div>
 
 <script type="text/javascript">
-    function joinToGame(gameID) {
+    // Join to selected game. If TeamDeathMatch, the team number should be provided {0,1}, if deathMatch it should be {0}
+    function joinToGame(gameID, team) {
         var url = '@Url.Action("JoinGameLobby", "Lobby")';
         $.ajax({
             url: url,
             type: 'POST',
             cache: false,
-            data: { gameId: gameID },
+            data: { gameId: gameID, teamNr: team },
             success: function (resp) {
                 if (resp.error) {
                     alert('Csak egy játékhoz csatlakozhatsz!');
                 }
             }
         });
+    }
+
+    // View the game's lobby, in which the players can be seen
+    function viewGame(gameID) {
+
+    }
+
+    // Play the game (should redirect to the game's page)
+    function playGame(gameID) {
+
     }
 
     function refresh() {
@@ -99,6 +110,8 @@
                 $('#discussion').append('<li><strong>' + htmlEncode(name)
                     + '</strong>: ' + htmlEncode(message) + '</li>');
             };
+
+            // List the players which are waiting for playing
             chat.client.lobbyList = function (userList) {
                 var currentName = $("#displayname").val();
                 $("#waitingUsersList").empty();
@@ -114,6 +127,7 @@
                 $("#joinLobby").html(message);
             };
 
+            // List the games which are active
             chat.client.activeGamesList = function (activeGames) {
                 $("#activeGamesList").empty();
 
@@ -127,26 +141,38 @@
                         gameType = "TeamDeathMatch";
 
                     var buttonText;
-                    if (contains(activeGames[game].users, "@User.Identity.Name"))
-                    {
+                    if (contains(activeGames[game].users, "@User.Identity.Name")) {
                         if (activeGames[game].users.length < 4)
                             buttonText = "Megtekintés";
                         else
                             buttonText = "Játék";
                     }
-                    else
-                    {
+                    else {
                         buttonText = "Csatlakozás";
                     }
 
+                    var buttonString;
+                    if (buttonText == "Megtekintés") {
+                        buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
+                    }
+                    else if (buttonText == "Játék") {
+                        buttonString = "<button type='submit' onclick='playGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
+                    }
+                    else {
+                        if (activeGames[game].gameType == 0)
+                            buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
+                        else
+                            buttonString = "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",0)'>" + buttonText + "|1</button>" +
+                                           "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",1)'>" + buttonText + "|2</button>";
+                    }
+
                     $("<li />", {
-                        html:
-                            "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ")'>" + buttonText + "</button>" +
-                            activeGames[game].gameName + " (" + gameType + ")"
+                        html: buttonString + activeGames[game].gameName + " (" + gameType + ")"
                     }).appendTo("#activeGamesList");
                 }
             };
 
+            // ???
             chat.client.startGame = function (userList) {
                 var currentName = $("#displayname").val();
                 var isPlaying = false;

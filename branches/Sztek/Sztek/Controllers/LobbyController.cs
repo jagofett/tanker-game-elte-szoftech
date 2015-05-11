@@ -97,6 +97,7 @@ namespace Sztek.Controllers
             if (current.game == null)
             {
                 current.inLobby = !current.inLobby.GetValueOrDefault();
+                
                 var game = _entities.Games.First(x => x.id == gameId);
                 if (!game.users.Contains(current))
                     game.users.Add(current);
@@ -104,8 +105,6 @@ namespace Sztek.Controllers
                     game.users.Remove(current);
 
                 _entities.SaveChanges();
-
-                var usersInLobby = _entities.Users.Where(x => x.inLobby != null && (bool)x.inLobby).ToList();
 
                 error = false;
 
