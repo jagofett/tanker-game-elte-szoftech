@@ -36,6 +36,12 @@ namespace SignalRChatApp.Hubs
             _context.Clients.All.activeGamesList(activeGamesList);
         }
 
+        public void GameMemberList(Object usersInGameList)
+        {
+            ////////////////////////////////////////////
+            _context.Clients.All.gameMembersList(usersInGameList);
+        }
+
         public void StartGame(Object userList)
         {
             _context.Clients.All.startGame(userList);

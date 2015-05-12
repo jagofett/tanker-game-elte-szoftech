@@ -4,8 +4,6 @@
     ViewBag.Title = "Váróterem";
 }
 
-@Html.Hidden("joinUrl",Url.Action("JoinLobby","Lobby"))
-
 <h2>Váróterem</h2>
 <section style="float: right">
     <div class="container">
@@ -18,7 +16,11 @@
         </div>
     </div>
 </section>
-<div id="activeGames">
+<div id="newGameCreator" style="padding-top: 20px">
+    <button type='submit' onclick="createGame(0)" style="margin-bottom:10px">Create new DeathMatch</button><br/>
+    <button type='submit' onclick="createGame(1)">Create new TeamDeathMatch</button>
+</div>
+<div id="activeGames" style="width:400px">
     <section id="activeGamesSection">
         <h3>Aktív játékok</h3>
         <ul id="activeGamesList">
@@ -47,7 +49,74 @@
 
     // View the game's lobby, in which the players can be seen
     function viewGame(gameID) {
+        activeGamesSection.style.display = "none";
 
+        var content = "<section id='gameDetailsSection'>" +
+                      "<h3>Játékosok</h3>" +
+                      "<ul id='UsersList'>" +
+                      "</ul>" +
+                      "<button type='submit' onclick='showActiveGames()'>Vissza</button>" +
+                      "</section>";
+        $("#activeGames").append(content);
+
+        var url = '@Url.Action("UsersInGame", "Lobby")';
+        var users = $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: { gameId: gameID }
+        });
+   
+        users.then(function (results, err) {
+            if (err == "success")
+            {
+                fillPlayersView(results);
+            }         
+        });
+    }
+
+    function fillPlayersView(players)
+    {
+        if ($("#UsersList") != null)
+        {
+            $("#UsersList").empty();
+            if (players[0].gameType == 0) {
+                showGameMembers(players, -1);
+            }
+            else {
+                showGameMembers(players, 0);
+                showGameMembers(players, 1);
+            }
+        }     
+    }
+
+    // Show list of players according to their team
+    function showGameMembers(userList, team) {
+        if (team != -1) {
+            var teamNr = team + 1;
+            $("<div />", {
+                html: teamNr + ". csapat",
+                style: "padding-bottom: 5px; margin-left: -20px; text-decoration:underline;"
+            }).appendTo("#UsersList");
+            showGameMembers(results, 1);
+
+            for (var u in userList) {
+                if (userList[u].team == team) {
+                    $("<li />", {
+                        html: userList[u].username,
+                        style: "padding-bottom: 5px"
+                    }).appendTo("#UsersList");
+                }
+            }
+        }
+        else {
+            for (var u in userList) {
+                $("<li />", {
+                    html: userList[u].username,
+                    style: "padding-bottom: 5px"
+                }).appendTo("#UsersList");
+            }
+        }
     }
 
     // Play the game (should redirect to the game's page)
@@ -56,9 +125,25 @@
     }
 
     // Create a new game
-    function createGame(typeNr) {
-
+    function createGame(typeNumber) {
+        var url = '@Url.Action("CreateNewGame", "Lobby")';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: { typeNr: typeNumber }
+        });
     }
+
+    function showActiveGames() {
+        // Refresh the page with the active games
+        activeGamesSection.style.display = "block";
+        if (activeGames.childElementCount == 2) {
+            activeGames.removeChild(gameDetailsSection);
+        }
+        $.ajax({ url: '@Url.Action("RefreshActiveGamesList", "Lobby")' });
+    }
+
 </script>
 
 @section scripts {
@@ -70,112 +155,129 @@
     <script src="~/signalr/hubs"></script>
     <!--SignalR script to update the chat page and send messages.-->
     <script>
-        $(function () {
-            // Reference the auto-generated proxy for the hub.
-            var chat = $.connection.chatHub;
-            // Create a function that the hub can call back to display messages.
-            chat.client.addNewMessageToPage = function (name, message) {
-                // Add the message to the page.
-                $('#discussion').append('<li><strong>' + htmlEncode(name)
-                    + '</strong>: ' + htmlEncode(message) + '</li>');
-            };
+    $(function () {
+        // Reference the auto-generated proxy for the hub.
+        var chat = $.connection.chatHub;
 
-            // List the games which are active
-            chat.client.activeGamesList = function (activeGames) {
-                $("#activeGamesList").empty();
+        // Create a function that the hub can call back to display messages.
+        chat.client.addNewMessageToPage = function (name, message) {
+            // Add the message to the page.
+            $('#discussion').append('<li><strong>' + htmlEncode(name)
+                + '</strong>: ' + htmlEncode(message) + '</li>');
+        };
 
-                noActiveGames.style.visibility = "hidden";
-                gameListLoadingText.style.visibility = "visible";
+        // Refresh players of a game
+        chat.client.gameMembersList = function (players) {
+            fillPlayersView(players.Data);
+        }
 
-                if (activeGames)
-                {
-                    for (var game in activeGames) {
-                        var gameType;
-                        if (activeGames[game].gameType == 0)
-                            gameType = "DeathMatch";
+        // List the games which are active
+        chat.client.activeGamesList = function (activeGames) {
+            $("#activeGamesList").empty();
+
+            noActiveGames.style.visibility = "hidden";
+            gameListLoadingText.style.visibility = "visible";
+
+            if (activeGames)
+            {
+                for (var game in activeGames) {
+                    var gameType;
+                    if (activeGames[game].gameType == 0)
+                        gameType = "DeathMatch";
+                    else
+                        gameType = "TeamDeathMatch";
+
+                    var buttonText;
+                    if (contains(activeGames[game].users, "@User.Identity.Name")) {
+                        if (activeGames[game].users.length < 4)
+                            buttonText = "Megtekintés";
                         else
-                            gameType = "TeamDeathMatch";
-
-                        var buttonText;
-                        if (contains(activeGames[game].users, "@User.Identity.Name")) {
-                            if (activeGames[game].users.length < 4)
-                                buttonText = "Megtekintés";
-                            else
-                                buttonText = "Játék";
-                        }
-                        else {
-                            buttonText = "Csatlakozás";
-                        }
-
-                        var buttonString;
-                        if (buttonText == "Megtekintés") {
-                            buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
-                        }
-                        else if (buttonText == "Játék") {
-                            buttonString = "<button type='submit' onclick='playGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
-                        }
-                        else {
-                            if (activeGames[game].gameType == 0)
-                                buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
-                            else
-                                buttonString = "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",0)'>" + buttonText + "|1</button>" +
-                                               "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",1)'>" + buttonText + "|2</button>";
-                        }
-
-                        $("<li />", {
-                            html: buttonString + activeGames[game].gameName + " (" + gameType + ")"
-                        }).appendTo("#activeGamesList");
+                            buttonText = "Játék";
                     }
-                }
-                gameListLoadingText.style.visibility = "hidden";
-            };
-
-            // ???
-            chat.client.startGame = function (userList) {
-                var currentName = $("#displayname").val();
-                var isPlaying = false;
-                for (var i = 0; i < userList.length; i++) {
-                    if (currentName == userList[i].username) {
-                        isPlaying = true;
-                        break;
+                    else {
+                        buttonText = "Csatlakozás";
                     }
-                }
-                if (isPlaying) {
-                    //todo játék indítása
-                    console.log(userList[i]);
-                }
-            };
 
-            // Get the user name and store it to prepend to messages.
-            $('#displayname').val("@User.Identity.Name");
-            // Set initial focus to message input box.
-            $('#message').focus();
-            // Start the connection.
-            $.connection.hub.start().done(function () {
-                $('#sendmessage').click(function () {
-                    // Call the Send method on the hub.
-                    chat.server.send($('#displayname').val(), $('#message').val());
-                    // Clear text box and reset focus for next comment.
-                    $('#message').val('').focus();
-                });
+                    var buttonString;
+                    if (buttonText == "Megtekintés") {
+                        buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
+                    }
+                    else if (buttonText == "Játék") {
+                        buttonString = "<button type='submit' onclick='playGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
+                    }
+                    else {
+                        if (activeGames[game].gameType == 0)
+                            buttonString = "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",0)'>" + buttonText + "</button>";
+                        else
+                            buttonString = "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",0)'>" + buttonText + " | 1</button>" +
+                                           "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",1)'>" + buttonText + " | 2</button>";
+                    }
+
+                    var elemBackground;
+                    if (contains(activeGames[game].users, "@User.Identity.Name")){
+                        elemBackground = "99CC00";
+                    }
+                    else {
+                        elemBackground = "ffffff";
+                    }
+                    $("<li />", {
+                        html: "<div style='background-color: #"+elemBackground+"; padding: 5px; box-shadow: 1px 1px 1px #888888;'>" +
+                            activeGames[game].gameName + " (" + gameType + ")<br/>" + buttonString + "</div>",
+                        style: "padding-bottom: 5px"
+                    }).appendTo("#activeGamesList");
+                }
+            }
+            gameListLoadingText.style.visibility = "hidden";
+        };
+
+        // ???
+        chat.client.startGame = function (userList) {
+            var currentName = $("#displayname").val();
+            var isPlaying = false;
+            for (var i = 0; i < userList.length; i++) {
+                if (currentName == userList[i].username) {
+                    isPlaying = true;
+                    break;
+                }
+            }
+            if (isPlaying) {
+                //todo játék indítása
+                console.log(userList[i]);
+            }
+        };
+
+        // Get the user name and store it to prepend to messages.
+        $('#displayname').val("@User.Identity.Name");
+        // Set initial focus to message input box.
+        $('#message').focus();
+        // Start the connection.
+        $.connection.hub.start().done(function () {
+            $('#sendmessage').click(function () {
+                // Call the Send method on the hub.
+                chat.server.send($('#displayname').val(), $('#message').val());
+                // Clear text box and reset focus for next comment.
+                $('#message').val('').focus();
             });
         });
 
-        // This optional function html-encodes messages for display in the page.
-        function htmlEncode(value) {
-            var encodedValue = $('<div />').text(value).html();
-            return encodedValue;
-        }
+        showActiveGames();
+    });
 
-        // This function helps to determine if an array contains an object
-        function contains(a, obj) {
-            for (var i = 0; i < a.length; i++) {
-                if (a[i] === obj) {
-                    return true;
-                }
+    // This optional function html-encodes messages for display in the page.
+    function htmlEncode(value) {
+        var encodedValue = $('<div />').text(value).html();
+        return encodedValue;
+    }
+
+    // This function helps to determine if an array contains an object
+    function contains(a, obj) {
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] === obj) {
+                return true;
             }
-            return false;
         }
+        return false;
+    }
 </script>
 
 }
