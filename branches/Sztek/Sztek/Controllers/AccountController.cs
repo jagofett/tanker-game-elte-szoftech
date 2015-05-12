@@ -90,7 +90,7 @@ namespace Sztek.Controllers
                 try
                 {
                     
-                    WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new { Description = model.Description, Country = model.Country, in_lobby = false});
+                    WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new { Description = model.Description, Country = model.Country, inLobby = false});
                     var id = WebSecurity.GetUserId(model.UserName);
                     var user = _entities.Users.FirstOrDefault(us => us.id == id);
                     if (user != null)

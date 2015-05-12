@@ -31,11 +31,6 @@ namespace SignalRChatApp.Hubs
             _context.Clients.All.addNewMessageToPage(name, message);
         }
 
-        public void LobbyList(Object userList)
-        {
-            _context.Clients.All.lobbyList(userList);
-        }
-
         public void ActiveGamesList(Object activeGamesList)
         {
             _context.Clients.All.activeGamesList(activeGamesList);

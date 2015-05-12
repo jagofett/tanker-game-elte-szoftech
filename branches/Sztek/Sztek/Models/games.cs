@@ -12,8 +12,6 @@ namespace Sztek.Models
 
         public int gameType { get; set; }
 
-        public int teams { get; set; }
-
         //public int max_player { get; set; }
 
         //public virtual ICollection<users> users { get; set; }

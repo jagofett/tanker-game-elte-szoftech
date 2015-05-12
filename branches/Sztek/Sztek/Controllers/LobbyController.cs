@@ -19,120 +19,65 @@ namespace Sztek.Controllers
         private LobbyController(HubHandler hubHandler)
         {
             _hubHandler = hubHandler;
-            _hubHandler.LobbyList(LobbyUsers());
+            _hubHandler.ActiveGamesList(ActiveGamesList());
         }
 
         [Authorize]
         [HttpPost]
-        public ActionResult JoinLobby()
+        public ActionResult JoinGameLobby(int gameId, int teamNr)
         {
-            var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
-            if (current == null)
+            var currentUser = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
+            if (currentUser == null)
                 return null;
 
-            int? id = null;
+            var currentGame = _entities.Games.FirstOrDefault(g => g.id == gameId);
+            if (currentGame == null)
+                return null;
+
             var error = true;
-            string btnString = "Csatlakozás";
 
-            var games = _entities.UserGames.Where(u => u.user.id == current.id).ToList();
-
-            if (current.game == null)
+            if (currentUser.game == null && currentUser.inLobby == false)
             {
-                current.inLobby = !current.inLobby.GetValueOrDefault();
-                _entities.SaveChanges();
-                //send the new lobby to users
-                GetLobbyList();
-                //if the lobby is full, start the game - todo new method!!
-                var inLobby = _entities.Users.Where(x => x.inLobby != null && (bool)x.inLobby).ToList();
-                if (inLobby.Count() >= 2)
+                var userGame = new userGame()
                 {
-                    var newGame = new games() { 
-                        gameType = 0,
-                        //users = inLobby, 
-                        status = true 
-                    };
-                    var gid = _entities.Games.Add(newGame);
-                    inLobby.ForEach(x =>
-                    {
-                        x.inLobby = false;
-                        x.game = newGame;
-                    });
-                    
-                    _entities.Games.First(x => x.id == gid.id).gameName = gid.gameType == 0
-                        ? "DeathMatch" + gid.id
-                        : "TeamDeathMatch" + gid.id;
-
-                    //egyéb game  indítás...
-                    _entities.SaveChanges();
-
-                    //soap hívás, server instance létrehozása
-                    var port = (newGame.id % 10000) + 10000;
-                    var users = inLobby.Select(users1 => users1.id.ToString()).ToArray();
-                    //var proxy = new MainClient();
-                    //proxy.startGameServer(port.ToString(), users[0],users[1], users[2], users[3]);
-
-                    var userList = inLobby.Select(x => new { x.username, userId = x.id, gameId = newGame.id });
-                    _hubHandler.StartGame(userList);
-                    GetLobbyList();
-                    id = newGame.id;
-                }             
-                error = false;
-
-                btnString = current.inLobby.GetValueOrDefault()
-                    ? "Kilépés"
-                    : "Csatlakozás";
-            }
-
-            return Json(new { error = error, btnStr = btnString }, JsonRequestBehavior.AllowGet);
-        }
-
-        [HttpPost]
-        public ActionResult JoinGameLobby(int gameId)
-        {
-            var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
-            if (current == null)
-                return null;
-
-            var error = true;
-            string btnString = "Csatlakozás";
-
-            if (current.game == null)
-            {
-                current.inLobby = !current.inLobby.GetValueOrDefault();
+                    game = currentGame,
+                    user = currentUser,
+                    team = teamNr
+                };
+                _entities.UserGames.Add(userGame);
+                _entities.SaveChanges();
                 
-                var game = _entities.Games.First(x => x.id == gameId);
-                /*
-                if (!game.users.Contains(current))
-                    game.users.Add(current);
-                else
-                    game.users.Remove(current);
-                */
+                currentUser.inLobby = !currentUser.inLobby.GetValueOrDefault();
                 _entities.SaveChanges();
 
                 error = false;
-
-                btnString = current.inLobby.GetValueOrDefault()
-                    ? "Kilépés"
-                    : "Csatlakozás";
             }
             //send the new lobby to users
-            GetLobbyList();
+            GetActiveGamesList();
 
-            return Json(new { error = error, btnStr = btnString }, JsonRequestBehavior.AllowGet);
+            return Json(new { error = error }, JsonRequestBehavior.AllowGet);
         }
 
-        public void GetLobbyList()
+        public void CreateNewGame(int typeNr)
+        {
+            var newGame = new games()
+            {
+                gameType = typeNr,
+                status = true
+            };
+            var gameEntity = _entities.Games.Add(newGame);
+            gameEntity.gameName = typeNr == 0
+                ? "DeathMatch" + _entities.Games.Count()
+                : "TeamDeathMatch" + _entities.Games.Count();
+            _entities.SaveChanges();
+        }
+
+        public void GetActiveGamesList()
         {
             if (Request.IsAuthenticated)
             {
-                _hubHandler.LobbyList(LobbyUsers());
                 _hubHandler.ActiveGamesList(ActiveGamesList());
             }
-        }
-
-        public JsonResult JoinedToLobby()
-        {
-            return new JsonResult();
         }
 
         private Object LobbyUsers()
@@ -155,10 +100,8 @@ namespace Sztek.Controllers
             List<object> act = new List<object>();
             foreach (var a in actives)
             {
-                /*
-                var users = _entities.Games.Where(g => g.id == a.id).First().users.Select(u => u.username).ToArray();
+                var users = _entities.UserGames.Where(g => g.game.id == a.id).ToArray();
                 act.Add(new { a.gameName, a.gameType, a.id, users });
-                */
             }
 
             return act;
