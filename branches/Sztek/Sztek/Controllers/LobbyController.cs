@@ -86,20 +86,51 @@ namespace Sztek.Controllers
             return Json(new { error = error }, JsonRequestBehavior.AllowGet);
         }
 
-        public void CreateNewGame(int typeNr)
+        public ActionResult CreateNewGame(int typeNr, string name)
         {
-            var newGame = new games()
+            var error = false;
+            var message = "";
+
+            if (!string.IsNullOrEmpty(name))
             {
-                gameType = typeNr,
-                status = true
-            };
-            var gameEntity = _entities.Games.Add(newGame);
-            gameEntity.gameName = typeNr == 0
-                ? "DeathMatch" + _entities.Games.Count()
-                : "TeamDeathMatch" + _entities.Games.Count();
+                var numOfSameName = _entities.Games.Where(x => x.gameName == name && x.status).Count();
+                if (numOfSameName > 0)
+                {
+                    error = true;
+                    message = "Már van ilyen nevű aktív játék";
+                }
+            }
+
+            if (!error)
+            {
+                var newGame = new games()
+                {
+                    gameType = typeNr,
+                    status = true
+                };
+                var gameEntity = _entities.Games.Add(newGame);
+                gameEntity.gameName = !string.IsNullOrEmpty(name)
+                ? name
+                : (typeNr == 0
+                    ? "DeathMatch" + _entities.Games.Count()
+                    : "TeamDeathMatch" + _entities.Games.Count());
+                _entities.SaveChanges();
+
+                RefreshActiveGamesList();
+            }
+
+            return Json(new { err = error, errMessage = message }, JsonRequestBehavior.AllowGet);
+        }
+
+        public void LeaveGame(int gameId)
+        {
+            var currentUser = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
+            var userGame = _entities.UserGames.First(e => e.game.id == gameId && e.user.id == currentUser.id);
+            _entities.UserGames.Remove(userGame);
+            currentUser.inLobby = false;
             _entities.SaveChanges();
 
-            RefreshActiveGamesList();
+            RefreshGameMembers(gameId);
         }
 
         public void RefreshGameMembers(int gameId)

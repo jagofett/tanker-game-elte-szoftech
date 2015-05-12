@@ -11,16 +11,18 @@
         <input type="text" id="message" />
         <input type="button" id="sendmessage" value="Küldés" />
         <input type="hidden" id="displayname" value="@User.Identity.Name" />
-        <div style="height: 300px; width:auto; border:1px solid #ccc; overflow:auto;">
+        <div style="height: 300px; width:auto; border:1px solid #ccc; overflow:auto; background-color: #ffffff">
             <ul id="discussion"></ul>
         </div>
     </div>
 </section>
 <div id="newGameCreator" style="padding-top: 20px">
-    <button type='submit' onclick="createGame(0)" style="margin-bottom:10px">Create new DeathMatch</button><br/>
-    <button type='submit' onclick="createGame(1)">Create new TeamDeathMatch</button>
+    <div style="margin-right: 5px;">Játék neve:</div>
+    <input type="text" id="gameName" placeholder="(optional)" style="max-width: 320px;"><br>
+    <button type='submit' onclick="createGame(0)" style="margin-right:10px; margin-bottom: 5px;">Új DeathMatch</button>
+    <button type='submit' onclick="createGame(1)" style="margin-bottom:5px">Új TeamDeathMatch</button>
 </div>
-<div id="activeGames" style="width:400px">
+<div id="activeGames" style="max-width:400px">
     <section id="activeGamesSection">
         <h3>Aktív játékok</h3>
         <ul id="activeGamesList">
@@ -55,6 +57,7 @@
                       "<h3>Játékosok</h3>" +
                       "<ul id='UsersList'>" +
                       "</ul>" +
+                      "<button type='submit' onclick='leaveGame(" + gameID + ")'>Játék elhagyása</button>" +
                       "<button type='submit' onclick='showActiveGames()'>Vissza</button>" +
                       "</section>";
         $("#activeGames").append(content);
@@ -66,19 +69,16 @@
             cache: false,
             data: { gameId: gameID }
         });
-   
+
         users.then(function (results, err) {
-            if (err == "success")
-            {
+            if (err == "success") {
                 fillPlayersView(results);
-            }         
+            }
         });
     }
 
-    function fillPlayersView(players)
-    {
-        if ($("#UsersList") != null)
-        {
+    function fillPlayersView(players) {
+        if ($("#UsersList") != null) {
             $("#UsersList").empty();
             if (players[0].gameType == 0) {
                 showGameMembers(players, -1);
@@ -87,7 +87,7 @@
                 showGameMembers(players, 0);
                 showGameMembers(players, 1);
             }
-        }     
+        }
     }
 
     // Show list of players according to their team
@@ -131,7 +131,15 @@
             url: url,
             type: 'POST',
             cache: false,
-            data: { typeNr: typeNumber }
+            data: { typeNr: typeNumber, name: $("#gameName")[0].value },
+            success: function (res) {
+                if (res.err && res.errMessage) {
+                    alert(res.errMessage);
+                }
+                else {
+                    alert("Játék sikeresen létrehozva");
+                }
+            }
         });
     }
 
@@ -144,6 +152,18 @@
         $.ajax({ url: '@Url.Action("RefreshActiveGamesList", "Lobby")' });
     }
 
+    function leaveGame(gameID) {
+        var url = '@Url.Action("LeaveGame", "Lobby")';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: { gameId: gameID },
+            success: function () {
+                showActiveGames();
+            }
+        });
+    }
 </script>
 
 @section scripts {
