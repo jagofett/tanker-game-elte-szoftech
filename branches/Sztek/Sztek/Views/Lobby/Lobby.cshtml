@@ -52,24 +52,36 @@
     // View the game's lobby, in which the players can be seen
     function viewGame(gameID) {
         activeGamesSection.style.display = "none";
+        newGameCreator.style.display = "none";
 
         var content = "<section id='gameDetailsSection'>" +
+                      "<h3>Játék adatai</h3>" +
+                      "<div id ='gameDetails'></div>" +
+                      "<button type='submit' onclick='showActiveGames()' style='margin-top: 20px;'>Vissza</button>" +
                       "<h3>Játékosok</h3>" +
                       "<ul id='UsersList'>" +
                       "</ul>" +
-                      "<button type='submit' onclick='leaveGame(" + gameID + ")'>Játék elhagyása</button>" +
-                      "<button type='submit' onclick='showActiveGames()'>Vissza</button>" +
                       "</section>";
         $("#activeGames").append(content);
 
-        var url = '@Url.Action("UsersInGame", "Lobby")';
+        // Get game details
+        $.ajax({
+            url: '@Url.Action("GetGameDetails", "Lobby")',
+            type: 'POST',
+            cache: false,
+            data: { gameId: gameID },
+            success: function (result, err) {
+                setDetails(result);
+            }
+        });
+
+        // Get players
         var users = $.ajax({
-            url: url,
+            url: '@Url.Action("UsersInGame", "Lobby")',
             type: 'POST',
             cache: false,
             data: { gameId: gameID }
         });
-
         users.then(function (results, err) {
             if (err == "success") {
                 fillPlayersView(results);
@@ -77,9 +89,51 @@
         });
     }
 
+    function setDetails(game) {
+        $("<div />", {
+            html: "<span style='font-weight:bold'>Név: </span>" + game.gameName + "<br>",
+            style: "padding-top: 10px; padding-bottom: 5px;"
+        }).appendTo("#gameDetails");
+
+        var typeText;
+        if (game.gameType == 0) {
+            typeText = "DeathMatch";
+        }
+        else {
+            typeText = "Team DeathMatch"
+        }
+        $("<div />", {
+            html: "<span style='font-weight:bold'>Típus: </span>" + typeText + "<br>",
+        }).appendTo("#gameDetails");
+
+        var buttonString;
+        if (!game.isUserPlayer) {
+            if (game.gameType == 0)
+                buttonString = "<button type='submit' onclick='joinToGame(" + game.id + ",0)'>Csatlakozás</button>";
+            else
+                buttonString = "<button type='submit' onclick='joinToGame(" + game.id + ",0)'>Csatlakozás | 1</button>" +
+                               "<button type='submit' onclick='joinToGame(" + game.id + ",1)'>Csatlakozás | 2</button>";
+        }
+        else {
+            buttonString = "<button type='submit' onclick='leaveGame(" + game.id + ")'>Játék elhagyása</button>";
+        }
+
+        $("<div />", {
+            html: buttonString,
+        }).appendTo("#gameDetailsSection");
+    }
+
     function fillPlayersView(players) {
         if ($("#UsersList") != null) {
             $("#UsersList").empty();
+
+            if (players.length == 0) {
+                $("<div />", {
+                    html: "Nincsenek csatlakozott játékosok",
+                    style: "padding-bottom: 5px; margin-left: -40px;"
+                }).appendTo("#UsersList");
+            }
+
             if (players[0].gameType == 0) {
                 showGameMembers(players, -1);
             }
@@ -98,12 +152,13 @@
                 html: teamNr + ". csapat",
                 style: "padding-bottom: 5px; margin-left: -20px; text-decoration:underline;"
             }).appendTo("#UsersList");
-            showGameMembers(results, 1);
 
             for (var u in userList) {
                 if (userList[u].team == team) {
+                    var dynamicLink = "<a href='/Account/Details/" + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
+
                     $("<li />", {
-                        html: userList[u].username,
+                        html: dynamicLink,
                         style: "padding-bottom: 5px"
                     }).appendTo("#UsersList");
                 }
@@ -111,8 +166,10 @@
         }
         else {
             for (var u in userList) {
+                var dynamicLink = "<a href='/Account/Details/" + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
+
                 $("<li />", {
-                    html: userList[u].username,
+                    html: dynamicLink,
                     style: "padding-bottom: 5px"
                 }).appendTo("#UsersList");
             }
@@ -146,6 +203,8 @@
     function showActiveGames() {
         // Refresh the page with the active games
         activeGamesSection.style.display = "block";
+        newGameCreator.style.display = "block";
+
         if (activeGames.childElementCount == 2) {
             activeGames.removeChild(gameDetailsSection);
         }
@@ -207,39 +266,22 @@
                     else
                         gameType = "TeamDeathMatch";
 
-                    var buttonText;
-                    if (contains(activeGames[game].users, "@User.Identity.Name")) {
-                        if (activeGames[game].users.length < 4)
-                            buttonText = "Megtekintés";
-                        else
-                            buttonText = "Játék";
-                    }
-                    else {
-                        buttonText = "Csatlakozás";
-                    }
-
                     var buttonString;
-                    if (buttonText == "Megtekintés") {
-                        buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
-                    }
-                    else if (buttonText == "Játék") {
-                        buttonString = "<button type='submit' onclick='playGame(" + activeGames[game].id + ")'>" + buttonText + "</button>";
-                    }
-                    else {
-                        if (activeGames[game].gameType == 0)
-                            buttonString = "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",0)'>" + buttonText + "</button>";
-                        else
-                            buttonString = "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",0)'>" + buttonText + " | 1</button>" +
-                                           "<button type='submit' onclick='joinToGame(" + activeGames[game].id + ",1)'>" + buttonText + " | 2</button>";
-                    }
-
                     var elemBackground;
-                    if (contains(activeGames[game].users, "@User.Identity.Name")){
+                    if (contains(activeGames[game].users, "@User.Identity.Name")) {
                         elemBackground = "99CC00";
+                        if (activeGames[game].users.length < 4) {
+                            buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>Részletek</button>";
+                        }        
+                        else {
+                            buttonString = "<button type='submit' onclick='playGame(" + activeGames[game].id + ")'>Játék</button>";
+                        }                          
                     }
                     else {
                         elemBackground = "ffffff";
+                        buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>Részletek</button>";
                     }
+
                     $("<li />", {
                         html: "<div style='background-color: #"+elemBackground+"; padding: 5px; box-shadow: 1px 1px 1px #888888;'>" +
                             activeGames[game].gameName + " (" + gameType + ")<br/>" + buttonString + "</div>",

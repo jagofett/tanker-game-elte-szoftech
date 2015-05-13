@@ -143,8 +143,17 @@ namespace Sztek.Controllers
 
         public ActionResult UsersInGame(int gameId)
         {
-            var user = _entities.UserGames.Where(x => x.game.id == gameId).Select(e => new { e.user.username, e.team, e.game.gameType }).ToArray();
+            var user = _entities.UserGames.Where(x => x.game.id == gameId).Select(e => new { e.user.id, e.user.username, e.team, e.game.gameType }).ToArray();
             return Json(user, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult GetGameDetails(int gameId)
+        {
+            var isPlayer = _entities.UserGames.Where(x => x.game.id == gameId && x.user.username == User.Identity.Name).Count() > 0
+                ? true
+                : false;
+            var game = _entities.Games.Where(x => x.id == gameId).Select(e => new { e.id, e.gameName, e.gameType, isUserPlayer = isPlayer }).First();
+            return Json(game, JsonRequestBehavior.AllowGet);
         }
 
         #region Active games list
