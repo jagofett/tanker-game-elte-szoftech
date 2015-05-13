@@ -6,16 +6,19 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using Sztek.Models;
+using Sztek.SztekServiceReference;
 
 namespace Sztek.Controllers
 {
     public class ToplistController : Controller
     {
+        private MainClient _proxy;
         //
         // GET: /TopList/
         private readonly DatabaseEntities _entities = new DatabaseEntities();
         public ActionResult Index()
         {
+            _proxy = new MainClient();
             var current = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
             if (current == null)
                 return RedirectToAction("NotLoggedIn", "Home");
@@ -35,7 +38,8 @@ namespace Sztek.Controllers
             {
                 toplists[i].Place = i + 1;
             }
-
+            //_proxy.startGameServer("12346", "1", "2", "3", "4", "1516", "ffa");
+            //_proxy.startGameServer("12345", "1", "2", "3", "4", "1515", "tdm");
             return View(toplists);
         }
     }

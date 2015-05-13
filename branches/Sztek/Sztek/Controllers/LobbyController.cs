@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using SignalRChatApp.Hubs;
 using Sztek.Models;
 using System.Web.Script.Serialization;
+using Sztek.SztekServiceReference;
 
 namespace Sztek.Controllers
 {
@@ -13,6 +15,7 @@ namespace Sztek.Controllers
     {
         private readonly DatabaseEntities _entities = new DatabaseEntities();
         private readonly HubHandler _hubHandler;
+        private readonly MainClient _proxy = new MainClient();
 
         public LobbyController() : this(HubHandler.Instance) { }
 
@@ -21,6 +24,22 @@ namespace Sztek.Controllers
             _hubHandler = hubHandler;
             _hubHandler.ActiveGamesList(ActiveGamesList());
         }
+        //use port 12345 and 12346
+        private void StartGameServer(int port, int player1, int player2, int player3, int player4, int gameId, int gameType)
+        {
+            var type = gameType == 0 ? "tdm" : "ffa";
+            try
+            {
+                _proxy.startGameServer(port.ToString(), player1.ToString(), player2.ToString(), player3.ToString(),
+                    player4.ToString(), gameId.ToString(), type);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                //throw;
+            }
+        }
+
 
         [Authorize]
         [HttpPost]
