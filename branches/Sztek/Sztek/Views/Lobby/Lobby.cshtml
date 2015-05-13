@@ -75,6 +75,13 @@
                 if (resp.error) {
                     alert('Csak egy játékhoz csatlakozhatsz!');
                 }
+                else {
+                    gameDetailsSection.removeChild(connectLeaveButton);
+                    $("<div />", {
+                        html: "<button type='submit' onclick='leaveGame(" + gameID + ")'>Játék elhagyása</button>",
+                        id: "connectLeaveButton"
+                    }).appendTo("#gameDetailsSection");
+                }
             }
         });
     }
@@ -151,6 +158,7 @@
 
         $("<div />", {
             html: buttonString,
+            id: "connectLeaveButton"
         }).appendTo("#gameDetailsSection");
     }
 
@@ -163,6 +171,8 @@
                     html: "Nincsenek csatlakozott játékosok",
                     style: "padding-bottom: 5px; margin-left: -40px;"
                 }).appendTo("#UsersList");
+
+                return;
             }
 
             if (players[0].gameType == 0) {
