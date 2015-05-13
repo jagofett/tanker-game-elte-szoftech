@@ -12,6 +12,7 @@ namespace Sztek.Models
     {
         public DatabaseEntities() : base("DefaultConnection")
         {
+            Database.SetInitializer<DatabaseEntities>(new CreateDatabaseIfNotExists<DatabaseEntities>());
         }
 
         //public DbSet<UserProfile> UserProfiles { get; set; }
