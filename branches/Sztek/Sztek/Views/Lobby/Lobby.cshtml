@@ -73,7 +73,7 @@
             data: { gameId: gameID, teamNr: team },
             success: function (resp) {
                 if (resp.error) {
-                    alert('Csak egy játékhoz csatlakozhatsz!');
+                    alert(resp.message);
                 }
                 else {
                     gameDetailsSection.removeChild(connectLeaveButton);

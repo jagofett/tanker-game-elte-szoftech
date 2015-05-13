@@ -60,63 +60,76 @@ namespace Sztek.Controllers
                 return null;
 
             var error = true;
+            var mess = "";
 
             if (currentUser.game == null && currentUser.inLobby == false)
             {
-                var userGame = new userGame()
+                var usersWaiting = _entities.UserGames.Where(g => g.game.id == gameId).ToList();
+                if (usersWaiting.Count >= 4)
                 {
-                    game = currentGame,
-                    user = currentUser,
-                    team = teamNr
-                };
-                _entities.UserGames.Add(userGame);
-                _entities.SaveChanges();
-                
-                currentUser.inLobby = !currentUser.inLobby.GetValueOrDefault();
-                _entities.SaveChanges();
-
-                //// Játék indítás ////
-                var userGamesList = _entities.UserGames.Where(g => g.game.id == gameId).ToList();
-                var started = false;
-                if (userGamesList.Count >= 4)
-                {
-                    // Indítsd a játékot!
-                    if (userGamesList[0].game.gameType == 1)
-                    {
-                        // TeamDeathMatch
-                        var port = 12345; //debug only
-                        var team1 = userGamesList.Where(us => us.team == 0).Select(x => x.user.id).ToList();
-                        var team2 = userGamesList.Where(us => us.team == 1).Select(x => x.user.id).ToList();
-                        started = StartGameServer(port, team1.Concat(team2).ToList(), gameId, 1);
-                    }
-                    else
-                    {
-                        // DeathMatch
-                        var port = 12346; //debug only
-                        var users = userGamesList.Select(us => us.user.id).ToList();
-                        started = StartGameServer(port, users, gameId, 0);
-
-                    }
-                    if (started)
-                    {
-                        userGamesList.ToList().ForEach(us => us.user.inLobby = false);
-                        //for debug, remove connected players.
-                        _entities.UserGames.RemoveRange(userGamesList);
-                        _entities.SaveChanges();
-                        //and the started game.
-                        _entities.Games.Remove(currentGame);
-                        _entities.SaveChanges();
-                    }
+                    mess = "Ez a játék betelt!";
                 }
-                //////////////////////
+                else
+                {
+                    var userGame = new userGame()
+                    {
+                        game = currentGame,
+                        user = currentUser,
+                        team = teamNr
+                    };
+                    _entities.UserGames.Add(userGame);
+                    _entities.SaveChanges();
 
-                error = false;
+                    currentUser.inLobby = !currentUser.inLobby.GetValueOrDefault();
+                    _entities.SaveChanges();
+
+                    //// Játék indítás ////
+                    var userGamesList = _entities.UserGames.Where(g => g.game.id == gameId).ToList();
+                    var started = false;
+                    if (userGamesList.Count >= 4)
+                    {
+                        // Indítsd a játékot!
+                        if (userGamesList[0].game.gameType == 1)
+                        {
+                            // TeamDeathMatch
+                            var port = 12345; //debug only
+                            var team1 = userGamesList.Where(us => us.team == 0).Select(x => x.user.id).ToList();
+                            var team2 = userGamesList.Where(us => us.team == 1).Select(x => x.user.id).ToList();
+                            started = StartGameServer(port, team1.Concat(team2).ToList(), gameId, 1);
+                        }
+                        else
+                        {
+                            // DeathMatch
+                            var port = 12346; //debug only
+                            var users = userGamesList.Select(us => us.user.id).ToList();
+                            started = StartGameServer(port, users, gameId, 0);
+
+                        }
+                        if (started)
+                        {
+                            userGamesList.ToList().ForEach(us => us.user.inLobby = false);
+                            //for debug, remove connected players.
+                            _entities.UserGames.RemoveRange(userGamesList);
+                            _entities.SaveChanges();
+                            //and the started game.
+                            _entities.Games.Remove(currentGame);
+                            _entities.SaveChanges();
+                        }
+                    }
+                    //////////////////////
+
+                    error = false;
+                }
+            }
+            else
+            {
+                mess = "Csak egy játékhoz csatlakozhatsz!";
             }
             //send the new lobby to users
             RefreshActiveGamesList();
             RefreshGameMembers(gameId);
 
-            return Json(new { error = error }, JsonRequestBehavior.AllowGet);
+            return Json(new { error = error, message = mess }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult CreateNewGame(int typeNr, string name)
