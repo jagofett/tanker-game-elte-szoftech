@@ -33,7 +33,7 @@ namespace SignalRChatApp.Hubs
 
         public void ActiveGamesList(Object activeGamesList)
         {
-            _context.Clients.All.activeGamesList(activeGamesList);
+            _context.Clients.All.activeGamesList(activeGamesList,-1);
         }
 
         public void GameMemberList(Object usersInGameList)
