@@ -25,17 +25,23 @@ namespace Sztek.Controllers
             _hubHandler.ActiveGamesList(ActiveGamesList());
         }
         //use port 12345 and 12346
-        private void StartGameServer(int port, int player1, int player2, int player3, int player4, int gameId, int gameType)
+        private bool StartGameServer(int port, List<int> players, int gameId, int gameType)
         {
             var type = gameType == 0 ? "tdm" : "ffa";
+            if (players.Count() != 4)
+            {
+                return false;
+            }
             try
             {
-                _proxy.startGameServer(port.ToString(), player1.ToString(), player2.ToString(), player3.ToString(),
-                    player4.ToString(), gameId.ToString(), type);
+                _proxy.startGameServer(port.ToString(), players[0].ToString(), players[1].ToString(), players[2].ToString(),
+                    players[3].ToString(), gameId.ToString(), type);
+                return true;
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
+                return false;
                 //throw;
             }
         }
@@ -71,27 +77,25 @@ namespace Sztek.Controllers
 
                 //// Játék indítás ////
                 var userGamesList = _entities.UserGames.Where(g => g.id == gameId).ToList();
+                var started = false;
                 if (userGamesList.Count >= 4)
                 {
                     // Indítsd a játékot!
                     if (userGamesList[0].game.gameType == 1)
                     {
                         // TeamDeathMatch
-                        foreach (var e in userGamesList)
-                        {
-                            if (e.team == 0)
-                            {
-
-                            }
-                            else
-                            {
-
-                            }
-                        }
+                        var port = 12345; //debug only
+                        var team1 = userGamesList.Where(us => us.team == 0).Select(x => x.user.id).ToList();
+                        var team2 = userGamesList.Where(us => us.team == 1).Select(x => x.user.id).ToList();
+                        started = StartGameServer(port, team1.Concat(team2).ToList(), gameId, 1);
                     }
                     else
                     {
                         // DeathMatch
+                        var port = 12346; //debug only
+                        var users = userGamesList.Select(us => us.game.id).ToList();
+                        started = StartGameServer(port, users, gameId, 0);
+
                     }  
                 }
                 //////////////////////
@@ -217,7 +221,7 @@ namespace Sztek.Controllers
                 ViewBag.Message = current.inLobby.GetValueOrDefault()
                     ? "Kilépés"
                     : "Csatlakozás";
-
+                RefreshActiveGamesList();
                 return View(_entities);
             }
             else

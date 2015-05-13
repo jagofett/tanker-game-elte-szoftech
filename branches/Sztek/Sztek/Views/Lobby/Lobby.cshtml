@@ -146,6 +146,7 @@
 
     // Show list of players according to their team
     function showGameMembers(userList, team) {
+        var url = '@Url.Action("Details", "Account")'; 
         if (team != -1) {
             var teamNr = team + 1;
             $("<div />", {
@@ -155,7 +156,8 @@
 
             for (var u in userList) {
                 if (userList[u].team == team) {
-                    var dynamicLink = "<a href='/Account/Details/" + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
+                    
+                    var dynamicLink = "<a href='" + url +'/' + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
 
                     $("<li />", {
                         html: dynamicLink,
@@ -166,7 +168,7 @@
         }
         else {
             for (var u in userList) {
-                var dynamicLink = "<a href='/Account/Details/" + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
+                var dynamicLink = "<a href='" + url + "/" + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
 
                 $("<li />", {
                     html: dynamicLink,
