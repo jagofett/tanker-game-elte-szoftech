@@ -31,6 +31,12 @@
 <div id="activeGames" style="max-width:400px">
     <section id="activeGamesSection">
         <h3>Aktív játékok</h3>
+        <button type='submit' onclick="filter()" style="margin-right:10px; margin-top: 10px;">Szűrés</button>
+        <select id="filterType" style="margin-top: 10px;">
+            <option value="-1">Mind</option>
+            <option value="0">DeathMatch</option>
+            <option value="1">TeamDeathMatch</option>
+        </select><br>
         <ul id="activeGamesList">
         </ul>
         <p id="noActiveGames">Nincsenek aktív játékok</p>
@@ -39,6 +45,18 @@
 </div>
 
 <script type="text/javascript">
+    function filter() {
+        var url = '@Url.Action("GetActiveGames", "Lobby")';
+        $.ajax({
+            url: url,
+            success: function (resp) {
+                if (resp) {
+                    $.connection.chatHub.client.activeGamesList(resp, filterType.value);
+                }
+            }
+        });
+    }
+
     function showNewGameCreator() {
         newGameCreator.style.display = "block";
         activeGamesSection.style.display = "none";
@@ -159,7 +177,7 @@
 
     // Show list of players according to their team
     function showGameMembers(userList, team) {
-        var url = '@Url.Action("Details", "Account")'; 
+        var url = '@Url.Action("Details", "Account")';
         if (team != -1) {
             var teamNr = team + 1;
             $("<div />", {
@@ -172,7 +190,7 @@
                 if (userList[u].team == team) {
                     isThereAnyPlayers = true;
 
-                    var dynamicLink = "<a href='" + url +'/' + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
+                    var dynamicLink = "<a href='" + url + '/' + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
 
                     $("<li />", {
                         html: dynamicLink,
@@ -234,7 +252,8 @@
         if (activeGames.childElementCount == 2) {
             activeGames.removeChild(gameDetailsSection);
         }
-        $.ajax({ url: '@Url.Action("RefreshActiveGamesList", "Lobby")',
+        $.ajax({
+            url: '@Url.Action("RefreshActiveGamesList", "Lobby")',
             success: function (resp) {
                 console.log(resp);
             },
@@ -284,7 +303,7 @@
         }
 
         // List the games which are active
-        chat.client.activeGamesList = function (activeGames) {
+        chat.client.activeGamesList = function (activeGames, type) {
             $("#activeGamesList").empty();
 
             noActiveGames.style.visibility = "hidden";
@@ -315,11 +334,14 @@
                         buttonString = "<button type='submit' onclick='viewGame(" + activeGames[game].id + ")'>Részletek</button>";
                     }
 
-                    $("<li />", {
-                        html: "<div style='background-color: #"+elemBackground+"; padding: 5px; box-shadow: 1px 1px 1px #888888;'>" +
-                            activeGames[game].gameName + " (" + gameType + ")<br/>" + buttonString + "</div>",
-                        style: "padding-bottom: 5px"
-                    }).appendTo("#activeGamesList");
+                    if (type == -1 || type == activeGames[game].gameType)
+                    {
+                        $("<li />", {
+                            html: "<div style='background-color: #" + elemBackground + "; padding: 5px; box-shadow: 1px 1px 1px #888888;'>" +
+                                activeGames[game].gameName + " (" + gameType + ")<br/>" + buttonString + "</div>",
+                            style: "padding-bottom: 5px"
+                        }).appendTo("#activeGamesList");
+                    }
                 }
             }
             gameListLoadingText.style.visibility = "hidden";

@@ -188,10 +188,15 @@ namespace Sztek.Controllers
             }
         }
 
-        private Object ActiveGamesList()
+        public ActionResult GetActiveGames()
         {
             var serializer = new JavaScriptSerializer(); 
+            var games = ActiveGamesList();
+            return Json(games, JsonRequestBehavior.AllowGet);
+        }
 
+        private Object ActiveGamesList()
+        {
             var actives = _entities.Games.Where(game => game.status != null && (bool)game.status)
                         .OrderBy(game => game.id)
                         .Select(x => new { x.id, x.gameName, x.gameType })
