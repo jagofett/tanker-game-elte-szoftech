@@ -16,12 +16,18 @@
         </div>
     </div>
 </section>
-<div id="newGameCreator" style="padding-top: 20px">
-    <div style="margin-right: 5px;">Játék neve:</div>
-    <input type="text" id="gameName" placeholder="(optional)" style="max-width: 320px;"><br>
-    <button type='submit' onclick="createGame(0)" style="margin-right:10px; margin-bottom: 5px;">Új DeathMatch</button>
-    <button type='submit' onclick="createGame(1)" style="margin-bottom:5px">Új TeamDeathMatch</button>
+<div id="newGameCreator" style="padding-top: 20px; display: none;">
+    <h3>Játék neve:</h3>
+    <input type="text" id="gameName" placeholder="(opcionális)" style="max-width: 320px;"><br>
+    <h3>Játék típusa:</h3>
+    <select id="newGameType">
+        <option value="0">DeathMatch</option>
+        <option value="1">TeamDeathMatch</option>
+    </select><br>
+    <button type='submit' onclick="createGame()" style="margin-right:10px; margin-top: 20px;">Új játék létrehozása</button><br>
+    <button type='submit' onclick='showActiveGames()' style='margin-top: 20px;'>Vissza</button>
 </div>
+<button id="newGameButton" type="submit" onclick="showNewGameCreator()" style="margin-top: 20px;">Új játék létrehozása</button>
 <div id="activeGames" style="max-width:400px">
     <section id="activeGamesSection">
         <h3>Aktív játékok</h3>
@@ -33,6 +39,12 @@
 </div>
 
 <script type="text/javascript">
+    function showNewGameCreator() {
+        newGameCreator.style.display = "block";
+        activeGamesSection.style.display = "none";
+        newGameButton.style.display = "none";
+    }
+
     // Join to selected game. If TeamDeathMatch, the team number should be provided {0,1}, if deathMatch it should be {0}
     function joinToGame(gameID, team) {
         var url = '@Url.Action("JoinGameLobby", "Lobby")';
@@ -53,6 +65,7 @@
     function viewGame(gameID) {
         activeGamesSection.style.display = "none";
         newGameCreator.style.display = "none";
+        newGameButton.style.display = "none";
 
         var content = "<section id='gameDetailsSection'>" +
                       "<h3>Játék adatai</h3>" +
@@ -184,19 +197,20 @@
     }
 
     // Create a new game
-    function createGame(typeNumber) {
+    function createGame() {
         var url = '@Url.Action("CreateNewGame", "Lobby")';
         $.ajax({
             url: url,
             type: 'POST',
             cache: false,
-            data: { typeNr: typeNumber, name: $("#gameName")[0].value },
+            data: { typeNr: newGameType.selectedIndex, name: $("#gameName")[0].value },
             success: function (res) {
                 if (res.err && res.errMessage) {
                     alert(res.errMessage);
                 }
                 else {
                     alert("Játék sikeresen létrehozva");
+                    showActiveGames();
                 }
             }
         });
@@ -205,12 +219,20 @@
     function showActiveGames() {
         // Refresh the page with the active games
         activeGamesSection.style.display = "block";
-        newGameCreator.style.display = "block";
+        newGameButton.style.display = "block";
+        newGameCreator.style.display = "none";
 
         if (activeGames.childElementCount == 2) {
             activeGames.removeChild(gameDetailsSection);
         }
-        $.ajax({ url: '@Url.Action("RefreshActiveGamesList", "Lobby")' });
+        $.ajax({ url: '@Url.Action("RefreshActiveGamesList", "Lobby")',
+            success: function (resp) {
+                console.log(resp);
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
     }
 
     function leaveGame(gameID) {
