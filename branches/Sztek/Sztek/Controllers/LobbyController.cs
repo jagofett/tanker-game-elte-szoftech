@@ -27,7 +27,7 @@ namespace Sztek.Controllers
         //use port 12345 and 12346
         private bool StartGameServer(int port, List<int> players, int gameId, int gameType)
         {
-            var type = gameType == 0 ? "tdm" : "ffa";
+            var type = gameType == 1 ? "tdm" : "ffa";
             if (players.Count() != 4)
             {
                 return false;
@@ -76,7 +76,7 @@ namespace Sztek.Controllers
                 _entities.SaveChanges();
 
                 //// Játék indítás ////
-                var userGamesList = _entities.UserGames.Where(g => g.id == gameId).ToList();
+                var userGamesList = _entities.UserGames.Where(g => g.game.id == gameId).ToList();
                 var started = false;
                 if (userGamesList.Count >= 4)
                 {
@@ -93,10 +93,20 @@ namespace Sztek.Controllers
                     {
                         // DeathMatch
                         var port = 12346; //debug only
-                        var users = userGamesList.Select(us => us.game.id).ToList();
+                        var users = userGamesList.Select(us => us.user.id).ToList();
                         started = StartGameServer(port, users, gameId, 0);
 
-                    }  
+                    }
+                    if (started)
+                    {
+                        userGamesList.ToList().ForEach(us => us.user.inLobby = false);
+                        //for debug, remove connected players.
+                        _entities.UserGames.RemoveRange(userGamesList);
+                        _entities.SaveChanges();
+                        //and the started game.
+                        _entities.Games.Remove(currentGame);
+                        _entities.SaveChanges();
+                    }
                 }
                 //////////////////////
 
