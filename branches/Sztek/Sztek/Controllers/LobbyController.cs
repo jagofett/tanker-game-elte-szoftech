@@ -65,9 +65,14 @@ namespace Sztek.Controllers
             if (currentUser.game == null && currentUser.inLobby == false)
             {
                 var usersWaiting = _entities.UserGames.Where(g => g.game.id == gameId).ToList();
+                var usersWaitingWithTeamNr = _entities.UserGames.Where(g => g.game.id == gameId && g.team == teamNr).ToList();
                 if (usersWaiting.Count >= 4)
                 {
                     mess = "Ez a játék betelt!";
+                }
+                else if (usersWaitingWithTeamNr.Count >= 2)
+                {
+                    mess = "Ez a csapat már betelt!";
                 }
                 else
                 {
