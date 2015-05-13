@@ -69,42 +69,110 @@ namespace Sztek.Controllers
                 currentUser.inLobby = !currentUser.inLobby.GetValueOrDefault();
                 _entities.SaveChanges();
 
+                //// Játék indítás ////
+                var userGamesList = _entities.UserGames.Where(g => g.id == gameId).ToList();
+                if (userGamesList.Count >= 4)
+                {
+                    // Indítsd a játékot!
+                    if (userGamesList[0].game.gameType == 1)
+                    {
+                        // TeamDeathMatch
+                        foreach (var e in userGamesList)
+                        {
+                            if (e.team == 0)
+                            {
+
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // DeathMatch
+                    }  
+                }
+                //////////////////////
+
                 error = false;
             }
             //send the new lobby to users
-            GetActiveGamesList();
+            RefreshActiveGamesList();
+            RefreshGameMembers(gameId);
 
             return Json(new { error = error }, JsonRequestBehavior.AllowGet);
         }
 
-        public void CreateNewGame(int typeNr)
+        public ActionResult CreateNewGame(int typeNr, string name)
         {
-            var newGame = new games()
+            var error = false;
+            var message = "";
+
+            if (!string.IsNullOrEmpty(name))
             {
-                gameType = typeNr,
-                status = true
-            };
-            var gameEntity = _entities.Games.Add(newGame);
-            gameEntity.gameName = typeNr == 0
-                ? "DeathMatch" + _entities.Games.Count()
-                : "TeamDeathMatch" + _entities.Games.Count();
-            _entities.SaveChanges();
+                var numOfSameName = _entities.Games.Where(x => x.gameName == name && x.status).Count();
+                if (numOfSameName > 0)
+                {
+                    error = true;
+                    message = "Már van ilyen nevű aktív játék";
+                }
+            }
+
+            if (!error)
+            {
+                var newGame = new games()
+                {
+                    gameType = typeNr,
+                    status = true
+                };
+                var gameEntity = _entities.Games.Add(newGame);
+                gameEntity.gameName = !string.IsNullOrEmpty(name)
+                ? name
+                : (typeNr == 0
+                    ? "DeathMatch" + _entities.Games.Count()
+                    : "TeamDeathMatch" + _entities.Games.Count());
+                _entities.SaveChanges();
+
+                RefreshActiveGamesList();
+            }
+
+            return Json(new { err = error, errMessage = message }, JsonRequestBehavior.AllowGet);
         }
 
-        public void GetActiveGamesList()
+        public void LeaveGame(int gameId)
+        {
+            var currentUser = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name);
+            var userGame = _entities.UserGames.First(e => e.game.id == gameId && e.user.id == currentUser.id);
+            _entities.UserGames.Remove(userGame);
+            currentUser.inLobby = false;
+            _entities.SaveChanges();
+
+            RefreshGameMembers(gameId);
+        }
+
+        public void RefreshGameMembers(int gameId)
+        {
+            if (Request.IsAuthenticated)
+            {
+                _hubHandler.GameMemberList(UsersInGame(gameId));
+            }
+        }
+
+        public ActionResult UsersInGame(int gameId)
+        {
+            var user = _entities.UserGames.Where(x => x.game.id == gameId).Select(e => new { e.user.username, e.team, e.game.gameType }).ToArray();
+            return Json(user, JsonRequestBehavior.AllowGet);
+        }
+
+        #region Active games list
+        public void RefreshActiveGamesList()
         {
             if (Request.IsAuthenticated)
             {
                 _hubHandler.ActiveGamesList(ActiveGamesList());
             }
-        }
-
-        private Object LobbyUsers()
-        {
-            return _entities.Users.Where(user => user.inLobby != null && (bool)user.inLobby)
-                        .OrderBy(us => us.username)
-                        .Select(x => new { x.username, x.id })
-                        .ToList();
         }
 
         private Object ActiveGamesList()
@@ -119,23 +187,13 @@ namespace Sztek.Controllers
             List<object> act = new List<object>();
             foreach (var a in actives)
             {
-                var users = _entities.UserGames.Where(g => g.game.id == a.id).ToArray();
+                var users = _entities.UserGames.Where(g => g.game.id == a.id).Select(u => u.user.username).ToArray();
                 act.Add(new { a.gameName, a.gameType, a.id, users });
             }
 
             return act;
         }
-
-        public int GetCurrentUserId()
-        {
-            return _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name).id;
-        }
-
-        public ActionResult GetUserId()
-        {
-            var user = _entities.Users.FirstOrDefault(us => us.username == User.Identity.Name).id;
-            return Json(user, JsonRequestBehavior.AllowGet);
-        }
+        #endregion
 
         public ActionResult Lobby()
         {
