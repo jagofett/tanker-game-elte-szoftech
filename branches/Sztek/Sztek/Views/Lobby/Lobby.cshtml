@@ -167,9 +167,11 @@
                 style: "padding-bottom: 5px; margin-left: -20px; text-decoration:underline;"
             }).appendTo("#UsersList");
 
+            var isThereAnyPlayers = false;
             for (var u in userList) {
                 if (userList[u].team == team) {
-                    
+                    isThereAnyPlayers = true;
+
                     var dynamicLink = "<a href='" + url +'/' + userList[u].id + "' id='dynamicLink'>" + userList[u].username + "</a>";
 
                     $("<li />", {
@@ -177,6 +179,13 @@
                         style: "padding-bottom: 5px"
                     }).appendTo("#UsersList");
                 }
+            }
+
+            if (isThereAnyPlayers == false) {
+                $("<div />", {
+                    html: "Nincsenek csatlakozott játékosok",
+                    style: "padding-bottom: 5px; margin-left: -20px;"
+                }).appendTo("#UsersList");
             }
         }
         else {
